@@ -577,7 +577,7 @@ void TVTGraphicData::getAID()
             break;
         //list
         case 2:
-            VTPicData = ww;
+            VTPicData = QString::number(ww);
             break;
         } //switch i
     } //for i
@@ -595,7 +595,7 @@ void TVTGraphicData::setAID()
     VTAttrAID[1].byteAID = 1;
     VTAttrAID[1].typeAID = 0;
     VTAttrAID[1].nameAID = "VTFormat";
-    VTAttrAID[1].valueAID = VTFormat;
+    VTAttrAID[1].valueAID = QString::number(VTFormat);
     VTAttrAID[2].numAID = 2;
     VTAttrAID[2].byteAID = 4;
     VTAttrAID[2].typeAID = 2;
@@ -724,7 +724,7 @@ void TVTScaledGraphic::getAID()
             break;
         //list
         case 6:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             break;
         } //switch i
     } //for i
@@ -752,12 +752,12 @@ void TVTScaledGraphic::setAID()
     VTAttrAID[3].byteAID = 1;
     VTAttrAID[3].typeAID = 1;
     VTAttrAID[3].nameAID = "VTScaleType";
-    VTAttrAID[3].valueAID = VTScaleType;
+    VTAttrAID[3].valueAID = QString::number(VTScaleType);
     VTAttrAID[4].numAID = 4;
     VTAttrAID[4].byteAID = 1;
     VTAttrAID[4].typeAID = 1;
     VTAttrAID[4].nameAID = "VTScaleOptions";
-    VTAttrAID[4].valueAID = VTScaleOptions;
+    VTAttrAID[4].valueAID = QString::number(VTScaleOptions);
     VTAttrAID[5].numAID = 5;
     VTAttrAID[5].byteAID = 2;
     VTAttrAID[5].typeAID = 1;
@@ -871,7 +871,7 @@ void TVTWorkingSetControl::getAID()
             break;
         //list
         case 4:
-            VTLanguages = ww;
+            VTLanguages = QString::number(ww);
             break;
         } //switch i
     } //for i
@@ -889,7 +889,7 @@ void TVTWorkingSetControl::setAID()
     VTAttrAID[1].byteAID = 2;
     VTAttrAID[1].typeAID = 0;
     VTAttrAID[1].nameAID = "VTByteNumber";
-    VTAttrAID[1].valueAID = VTByteNumber;
+    VTAttrAID[1].valueAID = QString::number(VTByteNumber);
     VTAttrAID[2].numAID = 2;
     VTAttrAID[2].byteAID = 2;
     VTAttrAID[2].typeAID = 0;

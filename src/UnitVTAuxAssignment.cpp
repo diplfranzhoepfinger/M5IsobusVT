@@ -102,21 +102,21 @@ QString  msgStr="",str="",wsName="";
          setClear=(VTWSetName=="FFFFFFFFFFFFFFFF");
          //
          VTModelIdentCode=pStream->readBytesVal(2);
-         msgStr+="Unit_Nr=" + QString(i+1) + " / " + QString(VTInputUnitNumber) + "\n";
+         msgStr+="Unit_Nr=" + QString::number(i+1) + " / " + QString::number(VTInputUnitNumber) + "\n";
          msgStr+=" WorkingSetName_hex=" + VTWSetName       + "\n";
          msgStr+=" ModelIdentCode_hex=" + getStringHEX(VTModelIdentCode,4)  + "\n";
          //
          VTPrefFuncNumber=pStream->read();
-         msgStr+="  PrefFuncNumber=" + QString(VTPrefFuncNumber) + "\n";
+         msgStr+="  PrefFuncNumber=" + QString::number(VTPrefFuncNumber) + "\n";
           //          
           if (VTPrefFuncNumber>0){
             for (j=0;j<VTPrefFuncNumber;j++) {
               VTFunctionReference=pStream->readBytesVal(2);
               VTInputReference=pStream->readBytesVal(2);
               //
-              msgStr+="   FuncInpID" + getStringHEX(j,2) + "=" + QString(VTFunctionReference) + " ";
+              msgStr+="   FuncInpID" + getStringHEX(j,2) + "=" + QString::number(VTFunctionReference) + " ";
               msgStr+="[" + getStringHEX(VTFunctionReference,4) + "]";
-              msgStr+=" <- " + QString(VTInputReference) + " ";
+              msgStr+=" <- " + QString::number(VTInputReference) + " ";
               msgStr+="[" + getStringHEX(VTInputReference,4) + "]\n";
               //Check Valid PreferedAssignment and AddInsert() to VTAuxAssignList
               VTError=VTError | setVTAuxAssignList(pVT_Net,dst);
@@ -144,7 +144,7 @@ QString  msgStr="",str="",wsName="";
    src=((pMsg->ID)>>8) & 0xFF; //check VT address
     if (((pMsg->ID & 0x00FF0000)==ECUtoVT_PGN) && (src==pVT_Net->VT_SRC) && (pMsg->DATA[0]==VT0PCommFunction)){
      VTInputUnitNumber=pMsg->DATA[1]; i=0;
-     msgStr+="Unit_Nr=" + QString(i+1) + " / " + QString(VTInputUnitNumber) + "\n";
+     msgStr+="Unit_Nr=" + QString::number(i+1) + " / " + QString::number(VTInputUnitNumber) + "\n";
      qWarning() << msgStr;
        //
        //clear aux assignment          
@@ -221,21 +221,21 @@ QString   str=pVT_Net->VTAuxAssignList,WS_auxFunc="",WS_auxInp="",auxFunc="",aux
        //
        if (TEST){
          qWarning() << "WS_auxFunc=" + WS_auxFunc;
-         qWarning() << "auxFunc="    + auxFunc + "/" + QString(auxFuncID);
-         qWarning() << "WS_auxFunc_listNr=" + QString(WS_auxFunc_listNr);
+         qWarning() << "auxFunc="    + auxFunc + "/" + QString::number(auxFuncID);
+         qWarning() << "WS_auxFunc_listNr=" + QString::number(WS_auxFunc_listNr);
          auxFuncID=hexCharacterToObjID(auxFunc);
          //
          qWarning() << "WS_auxInp="  + WS_auxInp;
-         qWarning() << "auxInp="     + auxInp + "/" + QString(auxInpID);
-         qWarning() << "WS_auxInp_listNr=" + QString(WS_auxInp_listNr);
+         qWarning() << "auxInp="     + auxInp + "/" + QString::number(auxInpID);
+         qWarning() << "WS_auxInp_listNr=" + QString::number(WS_auxInp_listNr);
        }
        //
        //FOUND AUX_ASSIGN
        //found auxInp assignment for auxFunc
        if ((auxInpID<0xFFFF) && (auxFuncID<0xFFFF)) {
         VTObjectReference=auxInpID; VTEnabled=true;
-        qWarning() << "FOUND auxInpID=" + QString(auxInpID);
-        qWarning() << "->WS_auxInp_listNr=" + QString(WS_auxInp_listNr);
+        qWarning() << "FOUND auxInpID=" + QString::number(auxInpID);
+        qWarning() << "->WS_auxInp_listNr=" + QString::number(WS_auxInp_listNr);
           //
           if ((WS_auxInp_listNr<2) && (oList!=WS_auxInp_listNr)) {
             pVT_Net->listNr=(pVT_Net->listNr+1) % 2;

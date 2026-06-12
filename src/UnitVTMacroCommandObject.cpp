@@ -1056,7 +1056,7 @@ bool TVTChangeAttribute::setMsgToAttr(CANMsg *pMsg, TVT_Net *pVT_Net)
             getVTObjectFromList(pVT_Net, objIdx);
             //getStreamStrInfo(pVT_Net);
             //get AttrbuteList(objType)
-            nameAttr = "VT_AID=" + QString(VTAttributeID);
+            nameAttr = "VT_AID=" + QString::number(VTAttributeID);
             valueAttr = "";
             //check SetAttribute
             valueAttr += char(pMsg->DATA[4]);

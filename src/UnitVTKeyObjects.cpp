@@ -129,17 +129,17 @@ void TVTSoftKeyMask::getAID()
             break;
         //List
         case 2:
-            VTItems = ww;
+            VTItems = QString::number(ww);
             VTEvent++;
             VTEvent += 2 * ww;
             break;
         case 3:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent++;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEvent = 0;
 };
 
@@ -295,17 +295,17 @@ void TVTKey::getAID()
             break;
         //List
         case 3:
-            VTObjects = ww;
+            VTObjects = QString::number(ww);
             VTEvent++;
             VTEvent += 6 * ww;
             break;
         case 4:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent++;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEvent = 0;
 };
 
@@ -547,17 +547,17 @@ void TVTButton::getAID()
             break;
         //List
         case 7:
-            VTObjects = ww;
+            VTObjects = QString::number(ww);
             VTEvent++;
             VTEvent += 6 * ww;
             break;
         case 8:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent++;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEvent = 0;
 };
 
@@ -745,17 +745,17 @@ void TVTKeyGroupObject::getAID()
             break;
         //List
         case 4:
-            VTItems = ww;
+            VTItems = QString::number(ww);
             VTEvent++;
             VTEvent += 2 * ww;
             break;
         case 5:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent++;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEvent = 0;
 };
 
@@ -903,7 +903,7 @@ void TVTLabelReferenceListObject::getAID()
         } //for j
         switch (i) {
         case 1:
-            VTLabels = ww;
+            VTLabels = QString::number(ww);
             break;
         } //switch i
     } //for i

@@ -228,9 +228,15 @@ void printDateTimeStructure(QString info,TVT_Net *pVT_Net) {
     if (!pVT_Net->RTC_active) info=info + "[not active]";
     str=+"\n" + info + " Now is : %d-%02d-%02d %02d:%02d:%02d\n";
     //
+#if !defined(ESP32) && !defined(ARDUINO)
+    Serial.printf(str.toUtf8().constData(),
+                  (pVT_Net->tmstruct.tm_year)+1900,(pVT_Net->tmstruct.tm_mon)+1,(pVT_Net->tmstruct.tm_mday),
+                  (pVT_Net->tmstruct.tm_hour)     ,(pVT_Net->tmstruct.tm_min)  ,(pVT_Net->tmstruct.tm_sec));
+#else
     Serial.printf(str.constData(),
                   (pVT_Net->tmstruct.tm_year)+1900,(pVT_Net->tmstruct.tm_mon)+1,(pVT_Net->tmstruct.tm_mday),
                   (pVT_Net->tmstruct.tm_hour)     ,(pVT_Net->tmstruct.tm_min)  ,(pVT_Net->tmstruct.tm_sec));
+#endif
 
     qWarning() << delm0;
 
@@ -238,12 +244,21 @@ void printDateTimeStructure(QString info,TVT_Net *pVT_Net) {
 
 //==============================================================================
 void getDateTimeStructure(TVT_Net *pVT_Net) {
+#if !defined(ESP32) && !defined(ARDUINO)
+    pVT_Net->tmstruct.tm_year = pVT_Net->RTCDate.date().year()-1900;
+    pVT_Net->tmstruct.tm_mon  = pVT_Net->RTCDate.date().month()-1;    // Month, 0 - jan
+    pVT_Net->tmstruct.tm_mday = pVT_Net->RTCDate.date().day();       // Day of the month
+    pVT_Net->tmstruct.tm_hour = pVT_Net->RTCtime.hour();
+    pVT_Net->tmstruct.tm_min  = pVT_Net->RTCtime.minute();
+    pVT_Net->tmstruct.tm_sec  = pVT_Net->RTCtime.second();
+#else
     pVT_Net->tmstruct.tm_year = pVT_Net->RTCDate.Year-1900;
     pVT_Net->tmstruct.tm_mon  = pVT_Net->RTCDate.Month-1;    // Month, 0 - jan
     pVT_Net->tmstruct.tm_mday = pVT_Net->RTCDate.Date;       // Day of the month
     pVT_Net->tmstruct.tm_hour = pVT_Net->RTCtime.Hours;
     pVT_Net->tmstruct.tm_min  = pVT_Net->RTCtime.Minutes;
     pVT_Net->tmstruct.tm_sec  = pVT_Net->RTCtime.Seconds;
+#endif
     //pVT_Net->tmstruct.tm_wday =Days since Sunday [0-6].
     pVT_Net->tmstruct.tm_isdst = -1;        // Is DST on? 1 = yes, 0 = no, -1 = unknown
 };//getDateTimeStructure
@@ -251,12 +266,17 @@ void getDateTimeStructure(TVT_Net *pVT_Net) {
 
 //==============================================================================
 void setDateTimeStructure(TVT_Net *pVT_Net) {
+#if !defined(ESP32) && !defined(ARDUINO)
+    pVT_Net->RTCtime = QTime(pVT_Net->tmstruct.tm_hour, pVT_Net->tmstruct.tm_min, pVT_Net->tmstruct.tm_sec);
+    pVT_Net->RTCDate = QDateTime(QDate(pVT_Net->tmstruct.tm_year+1900, pVT_Net->tmstruct.tm_mon+1, pVT_Net->tmstruct.tm_mday), pVT_Net->RTCtime);
+#else
     pVT_Net->RTCDate.Year   =pVT_Net->tmstruct.tm_year+1900;
     pVT_Net->RTCDate.Month  =pVT_Net->tmstruct.tm_mon+1; // Month, 0 - jan
     pVT_Net->RTCDate.Date   =pVT_Net->tmstruct.tm_mday;  // Day of the month
     pVT_Net->RTCtime.Hours  =pVT_Net->tmstruct.tm_hour;
     pVT_Net->RTCtime.Minutes=pVT_Net->tmstruct.tm_min;
     pVT_Net->RTCtime.Seconds=pVT_Net->tmstruct.tm_sec;
+#endif
 };//setDateTimeStructure
 
 
@@ -277,9 +297,15 @@ time_t VTDateTimeMinute(TVT_Net *pVT_Net,bool info,int8_t mOffset) {
         //set new time
         Set_CheckDateTime(pVT_Net);
         //
+#if !defined(ESP32) && !defined(ARDUINO)
+        sprintf(pVT_Net->timeStrbuff, "%02d.%02d.%d %02d:%02d:%02d",
+                pVT_Net->RTCDate.date().day(), pVT_Net->RTCDate.date().month(), pVT_Net->RTCDate.date().year(),
+                pVT_Net->RTCtime.hour(), pVT_Net->RTCtime.minute(), pVT_Net->RTCtime.second());
+#else
         sprintf(pVT_Net->timeStrbuff, "%02d.%02d.%d %02d:%02d:%02d",
                 pVT_Net->RTCDate.Date,pVT_Net->RTCDate.Month, pVT_Net->RTCDate.Year,
                 pVT_Net->RTCtime.Hours, pVT_Net->RTCtime.Minutes,pVT_Net->RTCtime.Seconds);
+#endif
     }
     //
     if ((info) && (pVT_Net->VTPageSelect==1)) {
@@ -303,9 +329,15 @@ time_t VTDateTime(TVT_Net *pVT_Net,bool info,int8_t hOffset) {
         pVT_Net->tmstruct=*localtime(&t_of_day);
         setDateTimeStructure(pVT_Net);
         getDateTimeStructure(pVT_Net);
+#if !defined(ESP32) && !defined(ARDUINO)
+        sprintf(pVT_Net->timeStrbuff, "%02d.%02d.%d %02d:%02d:%02d",
+                pVT_Net->RTCDate.date().day(), pVT_Net->RTCDate.date().month(), pVT_Net->RTCDate.date().year(),
+                pVT_Net->RTCtime.hour(), pVT_Net->RTCtime.minute(), pVT_Net->RTCtime.second());
+#else
         sprintf(pVT_Net->timeStrbuff, "%02d.%02d.%d %02d:%02d:%02d",
                 pVT_Net->RTCDate.Date,pVT_Net->RTCDate.Month, pVT_Net->RTCDate.Year,
                 pVT_Net->RTCtime.Hours, pVT_Net->RTCtime.Minutes,pVT_Net->RTCtime.Seconds);
+#endif
     }
     //
     if ((info) && (pVT_Net->VTPageSelect==1)) {
@@ -317,20 +349,30 @@ time_t VTDateTime(TVT_Net *pVT_Net,bool info,int8_t hOffset) {
 //==============================================================================
 time_t  VTFlushTime(TVT_Net *pVT_Net,bool info) {
     time_t t_of_day;
+#if defined(ESP32) || defined(ARDUINO)
     if (pVT_Net->RTC_active) {
         M5.Rtc.GetTime(&pVT_Net->RTCtime);  // Gets the time in the real-time clock.
         M5.Rtc.GetDate(&pVT_Net->RTCDate);
     } else {
+#endif
         getDateTimeStructure(pVT_Net);
         t_of_day = mktime(&pVT_Net->tmstruct);
         t_of_day+=1;
         pVT_Net->tmstruct=*localtime(&t_of_day);
         setDateTimeStructure(pVT_Net);
+#if defined(ESP32) || defined(ARDUINO)
     }
+#endif
     //
+#if !defined(ESP32) && !defined(ARDUINO)
+    sprintf(pVT_Net->timeStrbuff, "%02d.%02d.%d %02d:%02d:%02d",
+            pVT_Net->RTCDate.date().day(), pVT_Net->RTCDate.date().month(), pVT_Net->RTCDate.date().year(),
+            pVT_Net->RTCtime.hour(), pVT_Net->RTCtime.minute(), pVT_Net->RTCtime.second());
+#else
     sprintf(pVT_Net->timeStrbuff, "%02d.%02d.%d %02d:%02d:%02d",
             pVT_Net->RTCDate.Date,pVT_Net->RTCDate.Month, pVT_Net->RTCDate.Year,
             pVT_Net->RTCtime.Hours, pVT_Net->RTCtime.Minutes,pVT_Net->RTCtime.Seconds);
+#endif
     getDateTimeStructure(pVT_Net);
     //
     return VTDateTime(pVT_Net,info);
@@ -365,12 +407,17 @@ time_t VTDateTimeInit(TVT_Net *pVT_Net,bool compile,bool setWiFi)
         qWarning() << pVT_Net->timeStrbuff;
         qWarning() << delm0;
         //
+#if !defined(ESP32) && !defined(ARDUINO)
+        pVT_Net->RTCtime = QTime(hour, minute, second);
+        pVT_Net->RTCDate = QDateTime(QDate(year, month, day), pVT_Net->RTCtime);
+#else
         pVT_Net->RTCDate.Year=year;
         pVT_Net->RTCDate.Month=month;      // Month, 0 - jan
         pVT_Net->RTCDate.Date=day;         // Day of the month
         pVT_Net->RTCtime.Hours=hour;
         pVT_Net->RTCtime.Minutes=minute;
         pVT_Net->RTCtime.Seconds=second;
+#endif
         t_of_day1=VTDateTime(pVT_Net);
         qWarning() << "compile:"  << t_of_day1;
         qWarning() << "actual:" << t_of_day0;
@@ -561,6 +608,7 @@ void VT_CAN_MsgSend(TVT_Net *pVT_Net,CANMsg *pMsg){
         if (ctrlByte<=0x0A) return;
     }
     //
+#if defined(ESP32) || defined(ARDUINO)
 #ifdef COM_CAN_MODE
     CAN_frame_t tx_frame;
     tx_frame.FIR.B.RTR= CAN_no_RTR;
@@ -591,6 +639,9 @@ void VT_CAN_MsgSend(TVT_Net *pVT_Net,CANMsg *pMsg){
 #else
     sndStat=VTCAN0.sendMsgBuf(pMsg->ID, pMsg->MSGTYPE, pMsg->LEN, pMsg->DATA);
     valid=(sndStat == CAN_OK);
+#endif //COM_CAN_MODE
+#else
+    valid=false;
 #endif //COM_CAN_MODE
     //
     if (valid) {
@@ -629,6 +680,7 @@ bool VT_CAN_MsgReceive(TVT_Net *pVT_Net,CANMsg *pMsg){
     //Read Messages
     if (pVT_Net->CAN_active){
         //
+#if defined(ESP32) || defined(ARDUINO)
 #ifdef COM_CAN_MODE
         CAN_frame_t rx_frame;
         if (xQueueReceive(CAN_cfg.rx_queue, &rx_frame, 3 * portTICK_PERIOD_MS) ==pdTRUE) {
@@ -658,6 +710,9 @@ bool VT_CAN_MsgReceive(TVT_Net *pVT_Net,CANMsg *pMsg){
             //CANMsgPGN(pMsg);
         }
 #endif //COM_CAN_MODE
+#else
+        valid=false;
+#endif
     }//pVT_Net->CAN_active
     return valid;
 };//VT_CAN_MsgReceive
@@ -673,7 +728,7 @@ void setSerialPrint(TVT_Net *pVT_Net, QString str, bool pln){
         if (pln)
             qWarning() << str;
         else
-            qWarning( << str;
+            qWarning() << str;
     }
 }//setSerialPrint  
 
@@ -681,7 +736,11 @@ void setSerialPrint(TVT_Net *pVT_Net, QString str, bool pln){
 //==============================================================================
 //get heap
 uint32_t getHeapStatus(TVT_Net *pVT_Net,uint8_t hNr) {
+#if defined(ESP32) || defined(ARDUINO)
     uint32_t i=ESP.getFreeHeap();
+#else
+    uint32_t i=0;
+#endif
     uint32_t heapTime=QDateTime::currentDateTime().toMSecsSinceEpoch(),dTime=heapTime-pVT_Net->heapTime;
 #ifdef ESP32
     pVT_Net->heapTime=heapTime;
@@ -1315,6 +1374,7 @@ TVT_Net *ppVT_Net=NULL;
 
 //------------------------------------------------------------------------------
 //callback function
+#if defined(ESP32) || defined(ARDUINO)
 void PNGDraw(PNGDRAW *pDraw){
     int16_t  x=ppVT_Net->x, y=ppVT_Net->y;
     uint16_t w=ppVT_Net->w, ww=pDraw->iWidth;
@@ -1380,6 +1440,16 @@ bool PaintPNGDirect(TVT_Net *pVT_Net) {
     }//valid
     return valid;
 };//PaintPNGDirect
+#else
+bool PaintPNGToDirect(TVT_Net *pVT_Net) {
+    Q_UNUSED(pVT_Net);
+    return false;
+}
+bool PaintPNGDirect(TVT_Net *pVT_Net) {
+    Q_UNUSED(pVT_Net);
+    return false;
+}
+#endif
 
 
 
@@ -1596,6 +1666,7 @@ bool PaintBMPToDirect(TVT_Net *pVT_Net,TVTPixelXY* pXY) {
 
 
 //==============================================================================
+#if defined(ESP32) || defined(ARDUINO)
 bool PaintJPGToDirect(TVT_Net *pVT_Net) {
     bool valid=(getVTObjectListSize(pVT_Net)>0);
     uint32_t  pCount=0,i=0;
@@ -1634,14 +1705,14 @@ bool PaintJPGDirect(TVT_Net *pVT_Net) {
         qWarning() << F("===============");
         qWarning() << F("JPEG image info");
         qWarning() << F("===============");
-        qWarning() << F(  "Width      :")); qWarning( << JpegDec.width;
-                qWarning() << F(  "Height     :")); qWarning( << JpegDec.height;
-                qWarning() << F(  "Components :")); qWarning( << JpegDec.comps;
-                qWarning() << F(  "MCU / row  :")); qWarning( << JpegDec.MCUSPerRow;
-                qWarning() << F(  "MCU / col  :")); qWarning( << JpegDec.MCUSPerCol;
-                qWarning() << F(  "Scan type  :")); qWarning( << JpegDec.scanType;
-                qWarning() << F(  "MCU width  :")); qWarning( << JpegDec.MCUWidth;
-                qWarning() << F(  "MCU height :")); qWarning( << JpegDec.MCUHeight;
+        qWarning() << F(  "Width      :")); qWarning() << JpegDec.width;
+                qWarning() << F(  "Height     :")); qWarning() << JpegDec.height;
+                qWarning() << F(  "Components :")); qWarning() << JpegDec.comps;
+                qWarning() << F(  "MCU / row  :")); qWarning() << JpegDec.MCUSPerRow;
+                qWarning() << F(  "MCU / col  :")); qWarning() << JpegDec.MCUSPerCol;
+                qWarning() << F(  "Scan type  :")); qWarning() << JpegDec.scanType;
+                qWarning() << F(  "MCU width  :")); qWarning() << JpegDec.MCUWidth;
+                qWarning() << F(  "MCU height :")); qWarning() << JpegDec.MCUHeight;
                 qWarning() << F("===============");
     }
     //
@@ -1724,6 +1795,16 @@ void renderJPEG(TVT_Net *pVT_Net,TVTPixelXY *pXY) {
     } //while
     Set_setSwapBytes(pVT_Net,oldSwapBytes);
 };//renderJPEG
+#else
+bool PaintJPGToDirect(TVT_Net *pVT_Net) {
+    Q_UNUSED(pVT_Net);
+    return false;
+}
+bool PaintJPGDirect(TVT_Net *pVT_Net) {
+    Q_UNUSED(pVT_Net);
+    return false;
+}
+#endif
 
 
 //==============================================================================
@@ -1786,7 +1867,7 @@ bool PaintPictureToDirect(TVT_Net *pVT_Net,TVTPixelXY *pXY, uint8_t* tft_pic) {
     //
     if ((valid) and (bCount>0)) {
         if (flash){
-            pVT_Net->FlashList+=QString(objID) + "," + QString(x) + "," + QString(y) + "," + QString(wa) + "," + QString(ha) + ",\n";
+            pVT_Net->FlashList+=QString::number(objID) + "," + QString::number(x) + "," + QString::number(y) + "," + QString::number(wa) + "," + QString::number(ha) + ",\n";
             if (pVT_Net->Flash>=3) {
                 //Set_fillRect(pVT_Net,x,y,ww,hh,pVT_Net->FlashColor);
                 return valid;
@@ -2033,15 +2114,19 @@ void Set_M5Stack_PSRAM(TVT_Net *pVT_Net,uint8_t psRam){
     pVT_Net->tft.setAttribute(PSRAM_ENABLE,psRam);
     pVT_Net->PSRam=pVT_Net->tft.getAttribute(PSRAM_ENABLE);
     //
-    qWarning() << "PSRAM_ENABLE="); qWarning( << pVT_Net->PSRam;
+    qWarning() << "PSRAM_ENABLE=" << pVT_Net->PSRam;
             if (!pVT_Net->PSRam) pVT_Net->ImgMode=0;
 }; //Set_M5Stack     
 
 
 //------------------------------------------------------------------------------
 void Set_CheckDateTime(TVT_Net *pVT_Net){
+#if defined(ESP32) || defined(ARDUINO)
     if (!M5.Rtc.SetTime(&pVT_Net->RTCtime)) qWarning() << "wrong time set!";
     if (!M5.Rtc.SetDate(&pVT_Net->RTCDate)) qWarning() << "wrong date set!";
+#else
+    Q_UNUSED(pVT_Net);
+#endif
 }; //Set_CheckDateTime     
 
 
@@ -2181,7 +2266,7 @@ bool Set_loadFont(TVT_Net *pVT_Net, QString fntName){
         lCount=pVT_Net->stream_Font[i][j].available();
         //
         if (pVT_Net->VTPageSelect==0){
-            qWarning() << "lCount=" + QString(lCount) + "\t" + fntName;
+            qWarning() << "lCount=" << lCount << "\t" << fntName;
         }
         valid=(lCount>16);
         //
@@ -2192,8 +2277,8 @@ bool Set_loadFont(TVT_Net *pVT_Net, QString fntName){
             pVT_Net->tft.loadFont(pVT_Net->stream_Font[i][j].getBuffer());
             //
             if (TEST) {
-                fntName="arial" + QString(i) + "-" + QString(j);
-                qWarning() << "STREAM:valid new loadFont="); qWarning( << fntName;
+                fntName="arial" + QString::number(i) + "-" + QString::number(j);
+                qWarning() << "STREAM:valid new loadFont=" << fntName;
             }
         }//valid
     }else {
@@ -2206,7 +2291,7 @@ bool Set_loadFont(TVT_Net *pVT_Net, QString fntName){
         //
         if (valid){
             if (pVT_Net->VTPageSelect==0){
-                qWarning() << "SPIFFS-FONT="); qWarning( << str;
+                qWarning() << "SPIFFS-FONT=" << str;
             }
             Set_unloadFont(pVT_Net);
             //
@@ -2215,7 +2300,7 @@ bool Set_loadFont(TVT_Net *pVT_Net, QString fntName){
             //
             //TEST=true;
             if (TEST) {
-                qWarning() << "SPIFFS:valid new loadFont="); qWarning( << fntName;
+                qWarning() << "SPIFFS:valid new loadFont=" << fntName;
             }
         }else{
             //SD check
@@ -2233,7 +2318,7 @@ bool Set_loadFont(TVT_Net *pVT_Net, QString fntName){
                 pVT_Net->tft.loadFont(fntName);
                 //
                 if (TEST) {
-                    qWarning() << "SD:valid new loadFont="); qWarning( << fntName;
+                    qWarning() << "SD:valid new loadFont=" << fntName;
                 }
             }//valid
         }//valid
@@ -2859,9 +2944,9 @@ void getStreamStrInfo(TVT_Net *pVT_Net,uint32_t dCount,bool last) {
     if ((last) && (lCount>=2*dCount))  {
         k=lCount-dCount;
         qWarning() << delm0;
-        qWarning() << "lCount=" + QString(lCount);
-        qWarning() << "dCount=" + QString(dCount);
-        qWarning() << "StartIndex=" + QString(k);
+        qWarning() << "lCount=" << lCount;
+        qWarning() << "dCount=" << dCount;
+        qWarning() << "StartIndex=" << k;
         //
         while(k<lCount){
             cc=buff[k];
@@ -2914,7 +2999,7 @@ bool getStreamInfo(LoopbackStream *pStream,TVT_Net *pVT_Net) {
                 qWarning() << getStringHEX(buff[i],2) + "|";
             }//for i
             //
-            qWarning() << "");Serial.println("";
+            qWarning() << ""; Serial.println("");
                     valid=true;
 
         } //VT_InfoMode
@@ -2944,7 +3029,7 @@ QString getStreamTextInfo(LoopbackStream *pStream,TVT_Net *pVT_Net) {
             //
             if (pVT_Net->inputLineString.length()==0){
                 qWarning() << str;
-                qWarning() << "");Serial.println("";
+                qWarning() << ""; Serial.println("");
             }
             //
             valid=true;
@@ -3033,14 +3118,14 @@ void getAIDInfo(TVT_Net *pVT_Net) {
         }//for k
         //
         for (k=0;k<pVT_Net->VT_AID_Nr;k++){
-            str=QString(k) + " ";
+            str=QString::number(k) + " ";
             if (str.length()<3) str="0"+ str;
-            ss=String(pVT_Net->VTAttrAID[k].numAID);
+            ss=QString::number(pVT_Net->VTAttrAID[k].numAID);
             if (ss.length()<2) ss="0"+ ss;
 
             str+="numAID="  + ss + " ";
-            str+="byteAID=" + QString(pVT_Net->VTAttrAID[k].byteAID)+ " ";
-            str+="typeAID=" + QString(pVT_Net->VTAttrAID[k].typeAID)+ " ";
+            str+="byteAID=" + QString::number(pVT_Net->VTAttrAID[k].byteAID)+ " ";
+            str+="typeAID=" + QString::number(pVT_Net->VTAttrAID[k].typeAID)+ " ";
             //
             ss=pVT_Net->VTAttrAID[k].nameAID;
             while (ss.length()<len) ss+=" ";
@@ -3054,7 +3139,7 @@ void getAIDInfo(TVT_Net *pVT_Net) {
                 ww+=bb<<8*j;
             }//for j
 
-            str+="valueAID="+ QString(ww) + " [" + ss + "]";
+            str+="valueAID="+ QString::number(ww) + " [" + ss + "]";
             qWarning() << str;
         }//for k
         //
@@ -3069,8 +3154,8 @@ void getAIDInfo(TVT_Net *pVT_Net) {
 void setVTStatusMessage(TVT_Net *pVT_Net,CANMsg *pMsg) {
     //qWarning() << QDateTime::currentDateTime().toMSecsSinceEpoch()-pVT_Net->pTime;
     if (QDateTime::currentDateTime().toMSecsSinceEpoch()-pVT_Net->pTime>=3000) {
-        qWarning() << "VTStatus="); qWarning() << QDateTime::currentDateTime().toMSecsSinceEpoch(;
-                                                  pVT_Net->pTime=QDateTime::currentDateTime().toMSecsSinceEpoch();
+        qWarning() << "VTStatus=" << QDateTime::currentDateTime().toMSecsSinceEpoch();
+        pVT_Net->pTime=QDateTime::currentDateTime().toMSecsSinceEpoch();
         pMsg->ID=VTtoECU_PGN + (ECU_VT_PRIO<<24) + (0xFF<<8) + pVT_Net->VT_SRC;
         pMsg->MSG_TX=1;  pMsg->MSGTYPE=1; pMsg->LEN=8;
         pMsg->DATA[0]=0xFE;
@@ -3132,17 +3217,17 @@ void getVTDrawListInfoPrint(TVT_Net *pVT_Net,int16_t objIdx,uint8_t showAttr) {
         pVT_Net->VTObjID=objID; pVT_Net->VTObjType=objType; pVT_Net->VTObjName="INFO";
         runClassObj(pVT_Net,NULL,NULL);
         //
-        str+=QString(objIdx);
+        str+=QString::number(objIdx);
         while (str.length()<3) str="0" +str;
         str+=ss;
         //
-        str+=String(pObjID) + "->" + QString(objID);
+        str+=QString::number(pObjID) + "->" + QString::number(objID);
         //
         while (str.length()<12) str+=" ";
         //
-        str+=ss + QString(objType) + ss;
-        str+=String(x) + ss + QString(y) + ss + QString(w) + ss +String(h) + ss;
-        str+=String(level) + ss + QString(selected) + ss + QString(kIndex) + ss;
+        str+=ss + QString::number(objType) + ss;
+        str+=QString::number(x) + ss + QString::number(y) + ss + QString::number(w) + ss + QString::number(h) + ss;
+        str+=QString::number(level) + ss + QString::number(selected) + ss + QString::number(kIndex) + ss;
         str+=pVT_Net->VTObjName;
         qWarning() << str;
         //
@@ -3192,8 +3277,8 @@ uint16_t getVTDrawListAdd(TVT_Net *pVT_Net) {
         //TEST=true;
         if (TEST) {
             objID=buff[0] + (buff[1]<<8);  objType=buff[2];
-            qWarning() << i);   Serial.print("\t");Serial.print(objID;
-                    qWarning() << "\t");qWarning( << objType;
+            qWarning() << i;   Serial.print("\t");Serial.print(objID);
+                    qWarning() << "\t"; qWarning() << objType;
         }
         //
         pVT_Net->stream_Draw[pVT_Net->listNr].writeBytes((uint8_t*)buff,sSize);
@@ -3231,9 +3316,8 @@ QString setVTDrawListSoftKey(TVT_Net *pVT_Net) {
     int16_t  xx=0,yy=0,ww=0,hh=0;
     QString str="",ss="";
     bool TEST=false;
-    ButtonColors col = {NODRAW, NODRAW, NODRAW};
-    //
 #ifdef M5CORE2_MODE
+    ButtonColors col = {NODRAW, NODRAW, NODRAW};
     resetKeyButtonInputList(pVT_Net);
 #endif
     //
@@ -3276,7 +3360,7 @@ QString setVTDrawListSoftKey(TVT_Net *pVT_Net) {
             //
             if (ss.length()>0){
                 if (TEST){
-                    qWarning() << ss + "\t"); qWarning( << objID;
+                    qWarning() << ss + "\t"; qWarning() << objID;
                             qWarning() << xx;
                     qWarning() << yy;
                     qWarning() << ww;
@@ -3449,7 +3533,7 @@ void getVTObjectListInfo(TVT_Net *pVT_Net,int16_t objIdx,uint8_t showAttr) {
             //
             pVT_Net->objNr=i;pVT_Net->VTObjName="INFO";
             runClassObj(pVT_Net,NULL,NULL);
-            qWarning() << QString(i) + "->" + QString(pVT_Net->VTObjID) + "," + QString(pVT_Net->VTObjType) + "," + pVT_Net->VTObjName;
+            qWarning() << QString::number(i) + "->" + QString::number(pVT_Net->VTObjID) + "," + QString::number(pVT_Net->VTObjType) + "," + pVT_Net->VTObjName;
             //
             if ((showAttr & 0x02)>0) getAIDInfo(pVT_Net);
             if ((showAttr & 0x04)>0) getStreamStrInfo(pVT_Net);
@@ -3552,10 +3636,10 @@ uint16_t getVTObjectListAdd(TVT_Net *pVT_Net) {
         pVT_Net->stream_Pool[pVT_Net->listNr].writeBytesVal(len,4);
         //TEST
         if (TEST){
-            qWarning() << "Nr="); Serial.print(pVT_Net->objNr;
-                    qWarning() << "\t");  Serial.print(pVT_Net->VTObjID;
-                    qWarning() << "\t");  Serial.print(pVT_Net->VTObjType;
-                    qWarning() << "\t");  qWarning( << len;
+            qWarning() << "Nr="; Serial.print(pVT_Net->objNr);
+                    qWarning() << "\t";  Serial.print(pVT_Net->VTObjID);
+                    qWarning() << "\t";  Serial.print(pVT_Net->VTObjType);
+                    qWarning() << "\t";  qWarning() << len;
         }
         //
     }
@@ -3964,14 +4048,14 @@ void setClearScreen(TVT_Net *pVT_Net,bool listClear) {
     Set_setTextColor(pVT_Net,0);
     Set_setTextDatum(pVT_Net,0);
     pVT_Net->fntNr=4;pVT_Net->fntSr=1;
-    fntName="arial" + QString(pVT_Net->fontSet[pVT_Net->fntNr][6]) + "-" + QString(pVT_Net->fntSr);
+    fntName="arial" + QString::number(pVT_Net->fontSet[pVT_Net->fntNr][6]) + "-" + QString::number(pVT_Net->fntSr);
     Set_loadFont(pVT_Net,fntName);
     //
     Set_resetViewport(pVT_Net);
     Set_setCursor(pVT_Net,0, 0);
     //Set_fillRect(pVT_Net,x,y,w,h,cl_silver);
     Set_fillRect(pVT_Net,x,y,w,h,cl_white);
-    pVT_Net->infoStr[4]="VT6 ImgMode=" + QString(pVT_Net->ImgMode) + " KeyNr=" + QString(pVT_Net->TFT_KeyNr);
+    pVT_Net->infoStr[4]="VT6 ImgMode=" + QString::number(pVT_Net->ImgMode) + " KeyNr=" + QString::number(pVT_Net->TFT_KeyNr);
     str+="Mask=" + QString(h) + "x" + QString(h) + " Key=";
     str+=String(pVT_Net->TFT_KeyWidth) + "x" + QString(pVT_Net->TFT_KeyHeight);
     pVT_Net->infoStr[5]=str;
@@ -4739,7 +4823,7 @@ QString getHexCharacterString(QString str,bool reverse) {
         for (int i=0;i<len;i++) {
             j=i;
             if (reverse) j=len-1-i;
-            tStr+=getStringHEX(char(str[j]),2);
+            tStr+=getStringHEX(str[j].toLatin1(),2);
         }//for i
     }//>0
     return tStr;
@@ -4750,7 +4834,7 @@ QString getHexCharacterString(QString str,bool reverse) {
 QByteArray hexCharacterStringToBytes(QString string_)
 {
     QByteArray ret;
-    QString sStr="", tStr="", str=hexString;
+    QString sStr="", tStr="", str=string_;
     int i=0,j=0;
     while (str.length()>0) {
         sStr=str.mid(0,2);
@@ -4811,7 +4895,7 @@ uint32_t getVTObjectAttributeInt32(QString nameAttr, TVT_Net *pVT_Net) {
     } //for i
     pVT_Net->aIdx=aIdx; nn=0;
     if (attrStr.length()>0){
-        for (i=0;i<attrStr.length();i++) nn+=(char(attrStr[i]))<<8*i;
+        for (i=0;i<attrStr.length();i++) nn+=(attrStr[i].toLatin1())<<8*i;
     }
     //
     return nn;
@@ -4850,7 +4934,7 @@ bool SetObjPaintObjToRef(TVT_ViewRect *pViewRect,TVT_Net *pVT_Net,uint16_t objID
     int16_t  objIdx=getVTObjID(pVT_Net,objID,TypeMode);
     bool  valid=((lCount>0) && (objIdx>=0) && (objIdx<lCount)), TEST=false;
     if (TEST) {
-        qWarning() << "SetObjPaintObjToRef objIdx=" + QString(objIdx) + "\tObjID=" + QString(pVT_Net->VTObjID) + "\tObjType=" + QString(pVT_Net->VTObjType);
+        qWarning() << "SetObjPaintObjToRef objIdx=" << objIdx << "\tObjID=" << pVT_Net->VTObjID << "\tObjType=" << pVT_Net->VTObjType;
     }
     //
     if (valid) {
@@ -5284,8 +5368,8 @@ uint8_t TVTObject::setChangeAIDValue(uint8_t attrID, uint32_t attr, TVT_Net *pVT
                     }
                 } else {
                     if (VTAttrAID[i].typeAID == 1) {
-                        pVT_Net->VT_ChangeAttr = VTAttrAID[i].valueAID != QString(attr);
-                        VTAttrAID[i].valueAID = QString(attr);
+                        pVT_Net->VT_ChangeAttr = VTAttrAID[i].valueAID != QString::number(attr);
+                        VTAttrAID[i].valueAID = QString::number(attr);
                         err = 0x00;
                     }
                 }
@@ -5319,7 +5403,13 @@ uint16_t TVTObject::writeStringToStream(LoopbackStream *pStream) {
         //
         if (len > 0) {
             char  ch[len + 1];
+#if !defined(ESP32) && !defined(ARDUINO)
+            QByteArray ba = attrStr.toUtf8();
+            for (j = 0; j < len; j++) ch[j] = ba[j];
+            ch[len] = '\0';
+#else
             attrStr.toCharArray(ch, len + 1);
+#endif
             for (j = 0; j < len; j++) pStream->write(ch[j]);
         }
     }
@@ -5598,7 +5688,7 @@ void TVTObject::getVTWrapModeTextUniCode(QString str, TVT_Net *pVT_Net, bool tex
     while (str.length() > 0) {
         j=getUniCodeIndexOf(str,sr,0);
         if (j >= 0) {
-            tStr=getUniCod.mid(str,0,j/2);
+            tStr=getUniCodeSubstring(str,0,j/2);
             str=getUniCodeRemove(str,0,j/2+1);
         } else {
             tStr = str; str = "";
@@ -5610,22 +5700,22 @@ void TVTObject::getVTWrapModeTextUniCode(QString str, TVT_Net *pVT_Net, bool tex
                 nn0 = -1; nn1 = -1;
                 //
                 for (int k = 0; k < wd; k++) {
-                    wcm=char(tStr[2*k]) + (char(tStr[2*k+1])<<8);
+                    wcm=char(tStr[2*k].toLatin1()) + (char(tStr[2*k+1].toLatin1())<<8);
                     if (wcm==sc) nn0 = k; //check space
                     if (wcm==sm) nn1 = k; //check minus
                 }//for k
                 //HypenWrap
                 if (((optn & 0x04) == 0x04) && (nn1 > nn0)) {
-                    getVTTextDirect(getUniCod.mid(tStr,0,nn1+1), pVT_Net, textMode);
+                    getVTTextDirect(getUniCodeSubstring(tStr,0,nn1+1), pVT_Net, textMode);
                     getUniCodeRemove(tStr,0,nn1+1);
                     pVT_Net->fntLine++;
                 } else {
                     if (nn0 < 0) {
-                        getVTTextDirect(getUniCod.mid(tStr,0,wd), pVT_Net, textMode);
+                        getVTTextDirect(getUniCodeSubstring(tStr,0,wd), pVT_Net, textMode);
                         tStr=getUniCodeRemove(tStr,0,wd);
                         pVT_Net->fntLine++;
                     } else {
-                        getVTTextDirect(getUniCod.mid(tStr,0,nn0+1), pVT_Net, textMode);
+                        getVTTextDirect(getUniCodeSubstring(tStr,0,nn0+1), pVT_Net, textMode);
                         tStr=getUniCodeRemove(tStr,0,nn0+2);
                         pVT_Net->fntLine++;
                     }
@@ -5691,7 +5781,7 @@ uint16_t TVTObject::setVTObjectText(QString str,TVT_ViewRect *pViewRect, TVT_Net
     //
     //Flash inverted mode or hidden mode
     if ((fntFlash_hs) ||  (fntFlash_is)) {
-        pVT_Net->FlashList+=QString::number(VTObjID) + "," + QString(x) + "," + QString(y) + "," + QString(w) + "," + QString(h) + ",\n";
+        pVT_Net->FlashList+=QString::number(VTObjID) + "," + QString::number(x) + "," + QString::number(y) + "," + QString::number(w) + "," + QString::number(h) + ",\n";
         //
         if (fntFlash_hs) {
             if (pVT_Net->Flash>=3) {
@@ -5735,7 +5825,7 @@ uint16_t TVTObject::setVTObjectText(QString str,TVT_ViewRect *pViewRect, TVT_Net
         }
         //
         if ((fntNr != pVT_Net->fntNr) || (fntSr != pVT_Net->fntSr)) {
-            fntName = "arial" + QString::number(pVT_Net->fontSet[fntNr][6]) + "-" +  QString(fntSr);
+            fntName = "arial" + QString::number(pVT_Net->fontSet[fntNr][6]) + "-" +  QString::number(fntSr);
             //qWarning() << fntName;
             //
             //Load new font
@@ -5760,13 +5850,13 @@ uint16_t TVTObject::setVTObjectText(QString str,TVT_ViewRect *pViewRect, TVT_Net
     if (HasInArray(VTObjType,strgObjSet)) {
         //getStringHEXInfo(str,pVT_Net);
         //text string
-        while ((str.indexOf(0x0D)==0) && (str.indexOf(0x0A)==1)) {
+        while ((str.indexOf('\r')==0) && (str.indexOf('\n')==1)) {
             str.remove(0,2);y+=fntH; yy=y;
         }
-        while (str.indexOf(0x0A)==0) {
+        while (str.indexOf('\n')==0) {
             str.remove(0,1);y+=fntH; yy=y;
         }
-        while (str.indexOf(0x0D)==0) {
+        while (str.indexOf('\r')==0) {
             str.remove(0,1);
         }
         //
@@ -5942,17 +6032,17 @@ uint8_t TVTObject::SetVTObjectAttributeDirect(QString nameAttr, QString newValue
         //
         nameAttr="VTPoints";
         attrStr=getVTObjectAttributeDirect(nameAttr,pVT_Net);
-        for (i=0;i<attrStr.length();i++) nn+=char(attrStr[i])<<8*i;
+        for (i=0;i<attrStr.length();i++) nn+=char(attrStr[i].toLatin1())<<8*i;
         nameAttr="VTWidth";
         attrStr=getVTObjectAttributeDirect(nameAttr,pVT_Net);
-        for (i=0;i<attrStr.length();i++) w+=char(attrStr[i])<<8*i;
+        for (i=0;i<attrStr.length();i++) w+=char(attrStr[i].toLatin1())<<8*i;
         buff=pVT_Net->streamStr.getBuffer();
 
         buff[pVT_Net->aIdx+0]=char(newValueAttr[0].toLatin1());
         buff[pVT_Net->aIdx+1]=char(newValueAttr[1].toLatin1());
         nameAttr="VTHeight";
         attrStr=getVTObjectAttributeDirect(nameAttr,pVT_Net);
-        for (i=0;i<attrStr.length();i++) h+=char(attrStr[i])<<8*i;
+        for (i=0;i<attrStr.length();i++) h+=char(attrStr[i].toLatin1())<<8*i;
         buff[pVT_Net->aIdx+0]=char(newValueAttr[2].toLatin1());
         buff[pVT_Net->aIdx+1]=char(newValueAttr[3].toLatin1());
         //
@@ -5991,7 +6081,7 @@ uint8_t TVTObject::SetVTObjectAttributeDirect(QString nameAttr, QString newValue
         //
         attrStr=getVTObjectAttributeDirect(nameAttr,pVT_Net);
         len=attrStr.length();
-        for (i=0;i<attrStr.length();i++) nn+=char(attrStr[i])<<8*i;
+        for (i=0;i<attrStr.length();i++) nn+=char(attrStr[i].toLatin1())<<8*i;
         for (i=0;i<VT_AID_Nr;i++) aIdx+=VTAttrAID[i].byteAID;
         uint8_t idx=char(newValueAttr[0].toLatin1());
         buff=pVT_Net->streamStr.getBuffer();
@@ -6013,7 +6103,7 @@ uint8_t TVTObject::SetVTObjectAttributeDirect(QString nameAttr, QString newValue
         //TEST
         //getStreamStrInfo(pVT_Net);
         attrStr=getVTObjectAttributeDirect(nameAttr,pVT_Net);
-        for (i=0;i<attrStr.length();i++) nn+=char(attrStr[i])<<8*i;
+        for (i=0;i<attrStr.length();i++) nn+=char(attrStr[i].toLatin1())<<8*i;
         aIdx=pVT_Net->aIdx;
         nn=nn+attrStr.length(); attrStr="";
         buff=pVT_Net->streamStr.getBuffer();
@@ -6037,7 +6127,7 @@ uint8_t TVTObject::SetVTObjectAttributeDirect(QString nameAttr, QString newValue
     //
     if (nameAttr.indexOf("VTItemList")>=0) {
         attrStr=getVTObjectAttributeDirect(nameAttr,pVT_Net);
-        nn=char(attrStr[0]);attrStr="";j=char(newValueAttr[0].toLatin1());
+        nn=char(attrStr[0].toLatin1());attrStr="";j=char(newValueAttr[0].toLatin1());
         pVT_Net->VT_ChangeAttr=false;
         buff=pVT_Net->streamStr.getBuffer();
         for (i=0;i<VT_AID_Nr;i++) aIdx+=VTAttrAID[i].byteAID;
@@ -6068,7 +6158,7 @@ uint8_t TVTObject::SetVTObjectAttributeDirect(QString nameAttr, QString newValue
         //getStringHEXInfo(attrStr);
         //getStringHEXInfo(newValueAttr);
         //
-        nn=char(attrStr[0]);attrStr="";
+        nn=char(attrStr[0].toLatin1());attrStr="";
         pVT_Net->VT_ChangeAttr=false;
         buff=pVT_Net->streamStr.getBuffer();
         for (i=0;i<VT_AID_Nr;i++) aIdx+=VTAttrAID[i].byteAID;
@@ -6159,7 +6249,7 @@ uint8_t TVTObject::SetVTObjectAttributeDirect(QString nameAttr, QString newValue
                 buff=pVT_Net->streamStr.getBuffer();
                 //
                 for (j=0;j<nn;j++) {
-                    pVT_Net->VT_AttrValue+=char(attrStr[j])<<8*j;
+                    pVT_Net->VT_AttrValue+=char(attrStr[j].toLatin1())<<8*j;
                     //TEST
                     //getStringHEXInfo(newValueAttr);
                     //qWarning() << aIdx+j;
@@ -6218,11 +6308,11 @@ bool getVTAttrValueDirect(TVT_Net *pVT_Net,TVTObject *pObj,TVTAttrValue *pAttr){
     QString attrStr="";
     if (valid) {
         attrStr=pObj->getVTObjectAttributeDirect(pAttr->attrName[0],pVT_Net);
-        for (i=0;i<attrStr.length();i++) pAttr->attrValue[0]+=(char(attrStr[i]))<<8*i;
+        for (i=0;i<attrStr.length();i++) pAttr->attrValue[0]+=(char(attrStr[i].toLatin1()))<<8*i;
         attrStr=pObj->getVTObjectAttributeDirect(pAttr->attrName[1],pVT_Net);
-        for (i=0;i<attrStr.length();i++) pAttr->attrValue[1]+=(char(attrStr[i]))<<8*i;
+        for (i=0;i<attrStr.length();i++) pAttr->attrValue[1]+=(char(attrStr[i].toLatin1()))<<8*i;
         attrStr=pObj->getVTObjectAttributeDirect(pAttr->attrName[2],pVT_Net);
-        for (i=0;i<attrStr.length();i++) pAttr->attrValue[2]+=(char(attrStr[i]))<<8*i;
+        for (i=0;i<attrStr.length();i++) pAttr->attrValue[2]+=(char(attrStr[i].toLatin1()))<<8*i;
     }//valid
     return valid;
 };//getVTAttrValueDirect
@@ -6354,7 +6444,7 @@ QString getVTMacrosList(uint8_t eventID,TVT_Net *pVT_Net) {
     pVT_Net->nameAttr="";
     //TEST
     if (TEST){
-        qWarning() << "mCount=" + QString(mCount);
+        qWarning() << "mCount=" + QString::number(mCount);
         getStreamStrInfo(pVT_Net);
     }
     //
@@ -6428,10 +6518,10 @@ bool getVTMacrosListEvents(TVT_Net *pVT_Net,uint16_t objID,uint8_t eventID){
             //if (str.length()>=2) getArray8Info(pVT_Net,(uint8_t*) str.constData(),str.length());
             //
             while (str.length()>=2) {
-                objID=char(str[0]) + (char(str[1])<<8);
+                objID=(uint8_t)str[0].toLatin1() + ((uint8_t)str[1].toLatin1()<<8);
                 str.remove(0,2);
                 //TEST
-                if (TEST) qWarning() << "Macro_objID=" + QString(objID);
+                if (TEST) qWarning() << "Macro_objID=" + QString::number(objID);
                 //run Macros in array
                 runMacroCommands(pVT_Net,objID);
             }//while

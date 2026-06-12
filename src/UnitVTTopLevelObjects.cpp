@@ -138,21 +138,21 @@ void TVTWorkingSet::getAID()
             break;
         //List
         case 4:
-            VTObjects = ww;
+            VTObjects = QString::number(ww);
             VTEvent += 1;
             VTEvent += 6 * ww;
             break;
         case 5:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent += 1;
             break;
         case 6:
-            VTLanguages = ww;
+            VTLanguages = QString::number(ww);
             VTEvent += 1;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEvent = 0;
 };
 
@@ -358,18 +358,18 @@ void TVTDataMask::getAID()
             break;
         //List
         case 3:
-            VTObjects = ww;
+            VTObjects = QString::number(ww);
             VTEvent++;
             VTEvent += 6 * ww;
             break;
         case 4:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent++;
             break;
         } //switch i
         //
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEvent = 0;
 };
 
@@ -491,17 +491,17 @@ void TVTAlarmMask::getAID()
             break;
         //List
         case 5:
-            VTObjects = ww;
+            VTObjects = QString::number(ww);
             VTEvent += 1;
             VTEvent += 6 * ww;
             break;
         case 6:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent += 1;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEvent = 0;
 };
 
@@ -600,7 +600,7 @@ bool TVTContainer::PaintObjTo(TVT_ViewRect *pViewRect, TVT_Net *pVT_Net)
 bool TVTContainer::writeToStream(TVT_Net *pVT_Net, LoopbackStream *pStream)
 {
     return writeToStreamDirect(pVT_Net, pStream);
-};
+}
 
 //------------------------------------------------------------------------------
 bool TVTContainer::readFromStream(TVT_Net *pVT_Net, LoopbackStream *pStream)
@@ -642,7 +642,7 @@ bool TVTContainer::readFromStream(TVT_Net *pVT_Net, LoopbackStream *pStream)
         pVT_Net->streamStr.clear();
     } //valid
     return valid;
-};
+}
 
 //------------------------------------------------------------------------------
 void TVTContainer::getAID()
@@ -670,17 +670,17 @@ void TVTContainer::getAID()
             break;
         //List
         case 4:
-            VTObjects = ww;
+            VTObjects = QString::number(ww);
             VTEvent += 1;
             VTEvent += 6 * ww;
             break;
         case 5:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent += 1;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEvent = 0;
 };
 
@@ -694,17 +694,17 @@ void TVTContainer::setAID()
     VTAttrAID[0].valueAID = QString::number(VTObjType);
     VTAttrAID[1].numAID = 1;
     VTAttrAID[1].byteAID = 2;
-    VTAttrAID[1].typeAID = 0;
+    VTAttrAID[1].typeAID = 1;
     VTAttrAID[1].nameAID = "VTWidth";
     VTAttrAID[1].valueAID = QString::number(VTWidth);
     VTAttrAID[2].numAID = 2;
     VTAttrAID[2].byteAID = 2;
-    VTAttrAID[2].typeAID = 0;
+    VTAttrAID[2].typeAID = 1;
     VTAttrAID[2].nameAID = "VTHeight";
     VTAttrAID[2].valueAID = QString::number(VTHeight);
     VTAttrAID[3].numAID = 3;
     VTAttrAID[3].byteAID = 1;
-    VTAttrAID[3].typeAID = 0;
+    VTAttrAID[3].typeAID = 1;
     VTAttrAID[3].nameAID = "VTHidden";
     VTAttrAID[3].valueAID = QString::number(VTHidden);
     //
@@ -719,7 +719,7 @@ void TVTContainer::setAID()
     VTAttrAID[5].nameAID = "VTMacros";
     VTAttrAID[5].valueAID = VTMacros;
     VT_AID_Nr = 6;
-};
+}
 
 //==============================================================================
 //VTObjType=34
@@ -787,7 +787,7 @@ bool TVTWindowMaskObject::PaintObjTo(TVT_ViewRect *pViewRect, TVT_Net *pVT_Net)
 bool TVTWindowMaskObject::writeToStream(TVT_Net *pVT_Net, LoopbackStream *pStream)
 {
     return writeToStreamDirect(pVT_Net, pStream);
-};
+}
 
 //------------------------------------------------------------------------------
 bool TVTWindowMaskObject::readFromStream(TVT_Net *pVT_Net, LoopbackStream *pStream)
@@ -820,7 +820,7 @@ bool TVTWindowMaskObject::readFromStream(TVT_Net *pVT_Net, LoopbackStream *pStre
         for (i = 9; i < VT_AID_Nr; i++) {
             nn = VTAttrAID[i].valueAID.toInt();
             if (i == 9)
-                getVTItems(pVT_Net, nn, pStream);
+                getVTObjects(pVT_Net, nn, pStream);
             if (i == 10)
                 getVTObjects(pVT_Net, nn, pStream);
             if (i == 11)
@@ -831,7 +831,7 @@ bool TVTWindowMaskObject::readFromStream(TVT_Net *pVT_Net, LoopbackStream *pStre
         pVT_Net->streamStr.clear();
     } //valid
     return valid;
-};
+}
 
 //------------------------------------------------------------------------------
 void TVTWindowMaskObject::getAID()
@@ -879,21 +879,21 @@ void TVTWindowMaskObject::getAID()
             break;
         //List
         case 9:
-            VTObjRefs = ww;
+            VTObjRefs = QString::number(ww);
             VTEvent += 2;
             break;
         case 10:
-            VTObjects = ww;
+            VTObjects = QString::number(ww);
             VTEvent += 2;
             VTEvent += 6 * ww;
             break;
         case 11:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent += 1;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEvent = 0;
 };
 
@@ -1110,17 +1110,17 @@ void TVTAnimationObject::getAID()
             break;
         //List
         case 10:
-            VTObjects = ww;
+            VTObjects = QString::number(ww);
             VTEvent += 1;
             VTEvent += 6 * ww;
             break;
         case 11:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent += 1;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEvent = 0;
 };
 

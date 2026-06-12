@@ -187,10 +187,10 @@ uint16_t i=0,j=0;
         case 3:VTHeight=ww;VTEvent+=2;break;
         case 4:VTLineDirection   =ww;VTEvent+=1;break;
         //list
-        case 5:VTMacros=ww;VTEvent+=1;break; 
+        case 5:VTMacros=QString::number(ww);VTEvent+=1;break; 
        }//switch i
     }//for i
-    if (VTMacros==0) VTEvent=0;
+    if (VTMacros.toInt()==0) VTEvent=0;
 };
 
 //------------------------------------------------------------------------------
@@ -378,10 +378,10 @@ uint16_t i=0,j=0;
         case 4:VTLineSuppression   =ww;VTEvent+=1;break;
         case 5:VTFillAttributes   =ww;VTEvent+=2;break;
         //list
-        case 6:VTMacros=ww;VTEvent+=1;break; 
+        case 6:VTMacros=QString::number(ww);VTEvent+=1;break; 
        }//switch i
     }//for i
-    if (VTMacros==0) VTEvent=0;
+    if (VTMacros.toInt()==0) VTEvent=0;
 };
 
 
@@ -560,10 +560,10 @@ uint16_t i=0,j=0;
         case 6:VTEndAngle  =ww;VTEvent+=1;break;
         case 7:VTFillAttributes=ww;VTEvent+=2;break;
         //list
-        case 8:VTMacros=ww;VTEvent+=1;break; 
+        case 8:VTMacros=QString::number(ww);VTEvent+=1;break; 
        }//switch i
     }//for i
-    if (VTMacros==0) VTEvent=0;
+    if (VTMacros.toInt()==0) VTEvent=0;
 };
 
 
@@ -728,10 +728,10 @@ uint16_t i=0,j=0;
         case 5:VTPolygonType=ww;VTEvent+=1;break;
         //list
         case 6:VTPoints=ww;VTEvent+=1;VTEvent+=4*ww;break;
-        case 7:VTMacros=ww;VTEvent+=1;break; 
+        case 7:VTMacros=QString::number(ww);VTEvent+=1;break; 
        }//switch i
     }//for i
-    if (VTMacros==0) VTEvent=0;
+    if (VTMacros.toInt()==0) VTEvent=0;
 };
 
 
@@ -745,7 +745,7 @@ void TVTPolygon::setAID(){
  VTAttrAID[4].numAID=4;  VTAttrAID[4].byteAID=2; VTAttrAID[4].typeAID=1; VTAttrAID[4].nameAID="VTFillAttributes";VTAttrAID[4].valueAID=QString::number(VTFillAttributes);
  VTAttrAID[5].numAID=5;  VTAttrAID[5].byteAID=1; VTAttrAID[5].typeAID=1; VTAttrAID[5].nameAID="VTPolygonType";   VTAttrAID[5].valueAID=QString::number(VTPolygonType);
  //
- VTAttrAID[6].numAID=6;  VTAttrAID[6].byteAID=1; VTAttrAID[6].typeAID=2; VTAttrAID[6].nameAID="VTPoints";         VTAttrAID[6].valueAID=VTPoints;
+ VTAttrAID[6].numAID=6;  VTAttrAID[6].byteAID=1; VTAttrAID[6].typeAID=2; VTAttrAID[6].nameAID="VTPoints";         VTAttrAID[6].valueAID=QString::number(VTPoints);
  VTAttrAID[7].numAID=7;  VTAttrAID[7].byteAID=1; VTAttrAID[7].typeAID=2; VTAttrAID[7].nameAID="VTMacros";         VTAttrAID[7].valueAID=VTMacros;
  VT_AID_Nr=8;
 };

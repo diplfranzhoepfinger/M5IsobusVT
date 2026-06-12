@@ -178,10 +178,10 @@ uint16_t i=0,j=0;
         case 11:VTVariableReference=ww;VTEvent+=2;break;
         case 12:VTValue            =ww;VTEvent+=2;break;
         //list
-        case 13:VTMacros=ww;VTEvent+=1;break;
+        case 13:VTMacros=QString::number(ww);VTEvent+=1;break;
        }//switch i
     }//for i
-    if (VTMacros==0) VTEvent=0;
+    if (VTMacros.toInt()==0) VTEvent=0;
 };
 
 
@@ -419,10 +419,10 @@ uint16_t i=0,j=0;
         case 11:VTTargetVariableReference=ww;VTEvent+=2;break;
         case 12:VTTargetValue      =ww;VTEvent+=2;break;
         //list
-        case 13:VTMacros=ww;VTEvent+=1;break;
+        case 13:VTMacros=QString::number(ww);VTEvent+=1;break;
        }//switch i
     }//for i
-    if (VTMacros==0) VTEvent=0;
+    if (VTMacros.toInt()==0) VTEvent=0;
 };
 
 
@@ -682,10 +682,10 @@ uint16_t i=0,j=0;
         case 13:VTTargetVariableReference=ww;VTEvent+=2;break;
         case 14:VTTargetValue      =ww;VTEvent+=2;break;
         //list
-        case 15:VTMacros=ww;VTEvent+=1;break;
+        case 15:VTMacros=QString::number(ww);VTEvent+=1;break;
        }//switch i
     }//for i
-    if (VTMacros==0) VTEvent=0;
+    if (VTMacros.toInt()==0) VTEvent=0;
 };
 
 

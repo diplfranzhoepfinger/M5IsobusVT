@@ -112,7 +112,7 @@ void TVTExternalObject::getAID()
             break;
         //list
         case 4:
-            VTItems = ww;
+            VTItems = QString::number(ww);
             break;
         } //switch i
     } //for i
@@ -263,7 +263,7 @@ void TVTExternalObjectPointer::getAID()
             break;
         //list
         case 4:
-            VTValidationBitmask = ww;
+            VTValidationBitmask = QString::number(ww);
             break;
         } //switch i
     } //for i
@@ -281,7 +281,7 @@ void TVTExternalObjectPointer::setAID()
     VTAttrAID[1].byteAID = 2;
     VTAttrAID[1].typeAID = 1;
     VTAttrAID[1].nameAID = "VTDefaultObjectRef";
-    VTAttrAID[1].valueAID = QString(VTDefaultObjectRef);
+    VTAttrAID[1].valueAID = QString::number(VTDefaultObjectRef);
     VTAttrAID[2].numAID = 2;
     VTAttrAID[2].byteAID = 2;
     VTAttrAID[2].typeAID = 1;

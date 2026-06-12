@@ -11,6 +11,13 @@
 #include <QDebug>
 #include <math.h>
 
+#if !defined(ESP32) && !defined(ARDUINO)
+#include <stdlib.h>
+#define ps_malloc malloc
+DummySerial Serial;
+#endif
+
+
 //==============================================================================
 //global functions
 //==============================================================================
@@ -1298,14 +1305,14 @@ QString getStringLeftTrim(QString str)
 QString getStringRightTrim(QString str)
 {
     while ((str.length() > 0) && (str.endsWith(" ")))
-        str.remove(str.length() - 1);
+        str.chop(1);
     return str;
 }; //getStringRightTrim
 
 //==============================================================================
 QString getStringHEX(uint32_t valHex, uint8_t len)
 {
-    QString ss = QString(valHex, 16);
+    QString ss = QString::number(valHex, 16);
     ss = ss.toUpper();
     if (len > 0) {
         while (ss.length() < len)
@@ -1478,7 +1485,7 @@ QString getStringHEXInfo(QString str, bool info)
 //==============================================================================
 QString getStringDEC(uint32_t valDEC, uint8_t len)
 {
-    QString ss = QString(valDEC);
+    QString ss = QString::number(valDEC);
     ss = ss.toUpper();
     if (len > 0) {
         while (ss.length() < len)

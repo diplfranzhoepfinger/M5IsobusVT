@@ -123,10 +123,10 @@ uint16_t i=0,j=0,len=0;
         case 7:VTJustification=ww;VTEvent+=1;break;
         case 8:VTLength=ww; VTEvent+=2;VTEvent+=ww;break;
         //List
-        case 9:VTMacros =ww;VTEvent+=1;break;
+        case 9:VTMacros =QString::number(ww);VTEvent+=1;break;
        }//switch i
     }//for i
-    if (VTMacros==0) VTEvent=0;
+    if (VTMacros.toInt()==0) VTEvent=0;
 };
 
 //------------------------------------------------------------------------------
@@ -265,10 +265,10 @@ uint16_t i=0,j=0;
         // 
         case 12:VTJustification  =ww;VTEvent+=1;break;
         //list
-        case 13:VTMacros=ww;VTEvent+=1;break; 
+        case 13:VTMacros=QString::number(ww);VTEvent+=1;break; 
        }//switch i
     }//for i
-    if (VTMacros==0) VTEvent=0;
+    if (VTMacros.toInt()==0) VTEvent=0;
 };
 
 
@@ -288,7 +288,7 @@ void TVTOutputNumberField::setAID(){
  VTAttrAID[11].numAID=10;VTAttrAID[11].byteAID=1;VTAttrAID[11].typeAID=1;VTAttrAID[11].nameAID="VTFormat";          VTAttrAID[11].valueAID=QString::number(VTFormat);
  VTAttrAID[12].numAID=11;VTAttrAID[12].byteAID=1;VTAttrAID[12].typeAID=1;VTAttrAID[12].nameAID="VTJustification";   VTAttrAID[12].valueAID=QString::number(VTJustification); 
  //
- VTAttrAID[13].numAID=11;VTAttrAID[13].byteAID=1;VTAttrAID[13].typeAID=1;VTAttrAID[13].nameAID="VTMacros";VTAttrAID[13].valueAID=VTMacros;
+ VTAttrAID[13].numAID=11;VTAttrAID[13].byteAID=1;VTAttrAID[13].typeAID=2;VTAttrAID[13].nameAID="VTMacros";VTAttrAID[13].valueAID=VTMacros;
 VT_AID_Nr=14;
 };
 
@@ -400,11 +400,11 @@ uint16_t i=0,j=0;
         case 3:VTVariableReference=ww;VTEvent+=2;break;
         case 4:VTValue            =ww;VTEvent+=1;break;
         //list
-        case 5:VTItems =ww;VTEvent+=1;VTEvent+=2*ww;break; 
-        case 6:VTMacros=ww;VTEvent+=1;break; 
+        case 5:VTItems =QString::number(ww);VTEvent+=1;VTEvent+=2*ww;break; 
+        case 6:VTMacros=QString::number(ww);VTEvent+=1;break; 
        }//switch i
     }//for i
-    if (VTMacros==0) VTEvent=0;
+    if (VTMacros.toInt()==0) VTEvent=0;
 };
 
 

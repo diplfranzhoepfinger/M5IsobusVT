@@ -119,12 +119,12 @@ void TVTFontAttribute::getAID()
             break;
         //list
         case 5:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent += 1;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEvent = 0;
 };
 
@@ -266,12 +266,12 @@ void TVTLineAttribute::getAID()
             break;
         //list
         case 4:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent += 1;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEvent = 0;
 };
 
@@ -409,12 +409,12 @@ void TVTFillAttribute::getAID()
             break;
         //list
         case 4:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent += 1;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEvent = 0;
 };
 
@@ -552,12 +552,12 @@ void TVTInputAttribute::getAID()
             break;
         //list
         case 3:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent += 1;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEvent = 0;
 };
 
@@ -675,7 +675,7 @@ void TVTExtendedInputAttribute::getAID()
             break;
         //list
         case 2:
-            VTCodePlanes = ww;
+            VTCodePlanes = QString::number(ww);
             break;
         } //switch i
     } //for i

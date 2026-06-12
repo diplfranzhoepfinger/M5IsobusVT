@@ -18,6 +18,80 @@
 #include <QDebug>
 #include <QDir>
 
+#if !defined(ESP32) && !defined(ARDUINO)
+#include <QFile>
+#include <QFileInfo>
+#include <QDateTime>
+
+class DummyFile {
+public:
+    DummyFile() : m_isOpen(false), m_size(0), m_isDir(false) {}
+    DummyFile(const QString &path, bool isDir = false) : m_path(path), m_isOpen(false), m_size(0), m_isDir(isDir) {
+        if (!isDir) {
+            QFile f(path);
+            m_size = f.size();
+        }
+    }
+    operator bool() const { return !m_path.isEmpty(); }
+    bool isDirectory() const { return m_isDir; }
+    const char* name() const { return m_path.toLatin1().constData(); }
+    QString fileName() const { return m_path; }
+    size_t size() const { return m_size; }
+    void close() { m_isOpen = false; }
+    DummyFile openNextFile() { return DummyFile(); }
+    time_t getLastWrite() const { 
+        return QFileInfo(m_path).lastModified().toSecsSinceEpoch(); 
+    }
+    size_t available() const { return m_size; }
+    bool open(int) { 
+        m_isOpen = true; 
+        return true; 
+    }
+    size_t readBytes(char* buf, size_t len) {
+        QFile f(m_path);
+        if (f.open(QFile::ReadOnly)) {
+            size_t bytesRead = f.read(buf, len);
+            f.close();
+            return bytesRead;
+        }
+        return 0;
+    }
+private:
+    QString m_path;
+    bool m_isOpen;
+    size_t m_size;
+    bool m_isDir;
+};
+
+class DummyFS {
+public:
+    bool exists(const char* path) { return QFile::exists(path); }
+    bool remove(const char* path) { return QFile::remove(path); }
+    bool rmdir(const char* path) { return QDir().rmdir(path); }
+    DummyFile open(const char* path) { return DummyFile(path); }
+};
+
+class DummyM5Lcd {
+public:
+    int width() const { return 320; }
+    int height() const { return 240; }
+};
+
+class DummyM5 {
+public:
+    DummyM5Lcd Lcd;
+};
+
+inline DummyFS fs;
+inline DummyFS dummySD;
+inline DummyM5 dummyM5;
+
+#define File DummyFile
+#define SD dummySD
+#define M5 dummyM5
+#endif
+
+
 //==============================================================================
 bool VT_CAN_Transmit(TVT_Net *pVT_Net, CANMsg *pMsg)
 {
@@ -83,7 +157,7 @@ bool VT_CAN_Transmit(TVT_Net *pVT_Net, CANMsg *pMsg)
                 Set_fillRect(pVT_Net, 0, 0, 16, 16, 1);
                 if (pVT_Net->Flash == 1) {
                     //TEST
-                    qWarning() << "VTInstance=" + QString(pVT_Net->VTInstance);
+                    qWarning() << "VTInstance=" + QString::number(pVT_Net->VTInstance);
                     Set_setTextColor(pVT_Net, 0);
                     Set_setCursor(pVT_Net, 2, 2);
                     Set_drawGlyph(pVT_Net, 0x0030 + pVT_Net->VTInstance);
@@ -185,7 +259,9 @@ bool writeImageDirect(TVT_Net *pVT_Net)
     //
     yy = y + h - 1;
     while (yy >= y) {
+#if defined(ESP32) || defined(ARDUINO)
         pVT_Net->tft.readRectRGB(x, yy, w, 1, (uint8_t *) tft_buffer);
+#endif
         //swap rgb->bgr
         for (i = 0; i < bitDef * w; i++) {
             if ((i + 1) % 3 == 0) {
@@ -243,7 +319,7 @@ bool readImageScreen(const char *path, TVT_Net *pVT_Net)
     TVTPixelXY pXY;
     getHeapStatus(pVT_Net, 10);
     //
-    QFile bmpFS(path);
+    File bmpFS(path);
     if (!bmpFS.open(QFile::ReadOnly))
         return false;
     //
@@ -268,7 +344,9 @@ bool readImageScreen(const char *path, TVT_Net *pVT_Net)
                 qDebug() << a;
             }
             //
+#if defined(ESP32) || defined(ARDUINO)
             Serial.write(buff, len);
+#endif
             /*
        //download file write to serial
        while (pVT_Net->streamStr.available()) {
@@ -848,7 +926,7 @@ bool TVT_TimeDate::setMsgToAttr(CANMsg *pMsg, TVT_Net *pVT_Net)
         pMsg->DATA[2] = pVT_Net->RTCtime.hour() - pVT_Net->hourOffset; //hour- offset
         pMsg->DATA[3] = pVT_Net->RTCDate.date().month();               //month
         pMsg->DATA[4] = 4 * pVT_Net->RTCDate.date().day();             //day
-        pMsg->DATA[5] = pVT_Net->RTCDate.date.year() - 1985;           //year
+        pMsg->DATA[5] = pVT_Net->RTCDate.date().year() - 1985;           //year
         pMsg->DATA[6] = 0x7D;                                          //minutes_Offs valid
         pMsg->DATA[7] = 0x7D + pVT_Net->hourOffset;                    //hour_Offs
         //
@@ -1084,7 +1162,7 @@ int8_t TVTVersion::getLastVersionLabel(TVT_Net *pVT_Net)
 
                 pVT_Net->VT_VersionSize = -pVT_Net->VT_VersionSize;
                 str = "/" + VTVersionFolder;
-                listDir(str.constData(), 1, pVT_Net);
+                listDir(str.toLatin1().constData(), 1, pVT_Net);
                 qWarning() << pVT_Net->VT_VersionList;
                 pVT_Net->VT_VersionSize = abs(pVT_Net->VT_VersionSize);
                 VTVersionLabel = pVT_Net->VT_VersionLast;
@@ -1112,7 +1190,7 @@ bool TVTVersion::writeObjectFile(const char *path, TVT_Net *pVT_Net)
 
         QFile file(path);
         if (file.open(QFile::WriteOnly)) {
-            valid = file.write((uint8_t *) pVT_Net->streamStr.getBuffer(), lSize);
+            valid = file.write((const char *) pVT_Net->streamStr.getBuffer(), lSize);
 
             if (valid) {
                 //qWarning() << pVT_Net->objNr); qWarning( << path;
@@ -1133,14 +1211,14 @@ bool TVTVersion::storeFile(TVT_Net *pVT_Net)
         if (pVT_Net->VT_InfoMode > 0)
             qWarning() << str;
         //
-        if (createDir(str.constData(), pVT_Net)) {
+        if (createDir(str.toLatin1().constData(), pVT_Net)) {
             str = str + "/" + VTVersionLabel + ".iop";
-            deleteFile(str.constData(), NULL, pVT_Net);
+            deleteFile(str.toLatin1().constData(), NULL, pVT_Net);
             //
             if (pVT_Net->VT_InfoMode > 0)
                 qWarning() << str;
-            if (writeFile(str.constData(), pVT_Net)) {
-                QFile file(str);
+            if (writeFile(str.toLatin1().constData(), pVT_Net)) {
+                File file(str.toLatin1().constData());
                 if (file.open(QFile::ReadOnly)) {
                     time_t t = file.getLastWrite();
                     pVT_Net->tmstruct = *localtime(&t);
@@ -1163,11 +1241,11 @@ bool TVTVersion::writeFile(const char *path, TVT_Net *pVT_Net)
     bool valid = (lSize > 0);
     if (valid) {
         QFile file(path);
-        if (file.open(QFile::ReadOnly)) {
+        if (file.open(QFile::WriteOnly)) {
             pVT_Net->streamObj[pVT_Net->listNr].setPos(0);
             len = pVT_Net->streamObj[pVT_Net->listNr].available();
             buff = pVT_Net->streamObj[pVT_Net->listNr].getBuffer();
-            valid = file.write((uint8_t *) buff, len);
+            valid = file.write((const char *) buff, len);
             //
             file.close();
         } //file
@@ -1191,7 +1269,7 @@ bool TVTVersion::writeStreamToFile(const char *path, LoopbackStream *pStream, TV
         buff = pStream->getBuffer();
         len = pStream->available();
         qWarning() << "WRITE:" + ss + str + "\tbytes=" << len;
-        valid = file.write((uint8_t *) buff, len);
+        valid = file.write((const char *) buff, len);
         //
         file.close();
     } //file
@@ -1207,7 +1285,7 @@ bool TVTVersion::readFile(const char *path, LoopbackStream *pStream, TVT_Net *pV
     bool valid = false;
     if (pVT_Net->SD_Mode)
         ss = "SD";
-    QFile(path);
+    File file(path);
     if (file.open(QFile::ReadOnly)) {
         len = file.available();
         qWarning() << "READFILE:" + ss + str + "\tbytes=" << len;
@@ -1253,7 +1331,7 @@ bool TVTVersion::readFile(const char *path, LoopbackStream *pStream, TVT_Net *pV
         }
         //
         if (!valid) {
-            qWarning() << ":fileSize>bufferSize=" + QString(len) + ">" + QString(buffSize);
+            qWarning() << ":fileSize>bufferSize=" + QString::number(len) + ">" + QString::number(buffSize);
         }
         //
         file.close();
@@ -1278,7 +1356,7 @@ bool TVTVersion::deleteRecursive(const char *path, TVT_Net *pVT_Net)
         //
         qWarning() << "DIR=" + QString(path);
         //root.close();
-        QFile file = root.openNextFile();
+        File file = root.openNextFile();
         while (file) {
             qWarning() << QString(file.fileName());
             valid = fs.remove(file.name());
@@ -1305,7 +1383,7 @@ bool TVTVersion::deleteFile(const char *path, LoopbackStream *pStream, TVT_Net *
     if (fs.exists(path)) {
         setSerialPrint(pVT_Net, "Remove=" + QString(path));
         //valid=fs.remove(path);
-        valid = deleteRecursive(fs, path, pVT_Net);
+        valid = deleteRecursive(path, pVT_Net);
     }
     return valid;
 }; //TVTVersion::deleteFile
@@ -1356,11 +1434,11 @@ bool TVTVersion::listDir(const char *dirname, uint8_t levels, TVT_Net *pVT_Net)
     while (file) {
         if (file.isDirectory()) {
             if (pVT_Net->VT_InfoMode > 0) {
-                qWarning() << "DIR:" << file.name;
+                qWarning() << "DIR:" << file.name();
             }
             //
             if (levels) {
-                listDir(fs, file.name(), levels, pVT_Net);
+                listDir(file.name(), levels, pVT_Net);
             }
         } else {
             if (pVT_Net->VT_InfoMode > 0) {
@@ -1404,7 +1482,7 @@ bool TVTVersion::listDir(const char *dirname, uint8_t levels, TVT_Net *pVT_Net)
             //
             if (pVT_Net->VT_InfoMode > 0)
                 qWarning() << "\t SIZE:";
-            str = formatBytes(file.size()) + "\t" + QString(file.size());
+            str = formatBytes(file.size()) + "\t" + QString::number(file.size());
             if (pVT_Net->VT_InfoMode > 0) {
                 qWarning() << str;
                 if (pVT_Net->VT_InfoMode > 0)
@@ -1480,10 +1558,10 @@ bool TVTGetVersion::setMsgToAttr(CANMsg *pMsg, TVT_Net *pVT_Net, LoopbackStream 
             //pVT_Net->VT_InfoMode=1;
             pVT_Net->VT_VersionSize = 14;
 
-            listDir(SD, str.constData(), 1, pVT_Net);
+            listDir(str.toLatin1().constData(), 1, pVT_Net);
             if (pVT_Net->VT_InfoMode > 0)
                 qWarning() << delm1;
-            //listDir(SD, "/", 0,pVT_Net);
+            //listDir("/", 0, pVT_Net);
             //pVT_Net->VT_InfoMode=0;
             //
             if (pVT_Net->VT_InfoMode > 0) {
@@ -1506,7 +1584,7 @@ bool TVTGetVersion::setMsgToAttr(CANMsg *pMsg, TVT_Net *pVT_Net, LoopbackStream 
             pStream->clear();
             pStream->write(0xE0);
             pStream->write(pVT_Net->VT_VersionCount);
-            pStream->writeBytes((uint8_t *) byteArray, cc, -1);
+            pStream->writeBytes((uint8_t *) byteArray.data(), cc, -1);
             getStreamInfo(pStream, pVT_Net);
             //qWarning() << pStream->available();
             //
@@ -1556,9 +1634,9 @@ bool TVTStoreVersion::setMsgToAttr(CANMsg *pMsg, TVT_Net *pVT_Net, LoopbackStrea
         //
         if (VTError == 0x00) {
             VTError = 0x01;
-            if (storeFile(SD, pVT_Net)) {
+            if (storeFile(pVT_Net)) {
                 str = "/" + VTVersionFolder;
-                listDir(SD, str.constData(), 1, pVT_Net);
+                listDir(str.toLatin1().constData(), 1, pVT_Net);
                 VTError = 0x00;
             }
         }
@@ -1613,10 +1691,10 @@ bool TVTLoadVersion::setMsgToAttr(CANMsg *pMsg, TVT_Net *pVT_Net, LoopbackStream
         if (VTError == 0x00) {
             VTError = 0x01;
             str = "/" + VTVersionFolder;
-            listDir(SD, str.constData(), 1, pVT_Net);
+            listDir(str.toLatin1().constData(), 1, pVT_Net);
             str = str + "/" + VTVersionLabel + ".iop";
             //qWarning() << str;
-            if (readFile(SD, str.constData(), pStream, pVT_Net))
+            if (readFile(str.toLatin1().constData(), pStream, pVT_Net))
                 VTError = 0x00;
         }
         //
@@ -1665,10 +1743,9 @@ bool TVTDeleteVersion::setMsgToAttr(CANMsg *pMsg, TVT_Net *pVT_Net, LoopbackStre
         //if (VTError==0x00) {
         VTError = 0x01;
         str = "/" + VTVersionFolder;
-        str = str + "/" + VTVersionLabel + ".iop";
-        if (deleteFile(str.constData(), pStream, pVT_Net)) {
-            str = "/" + VTVersionFolder;
-            listDir(str.constData(), 1, pVT_Net);
+        QString fullPath = str + "/" + VTVersionLabel + ".iop";
+        if (deleteFile(fullPath.toLatin1().constData(), pStream, pVT_Net)) {
+            listDir(str.toLatin1().constData(), 1, pVT_Net);
             VTError = 0x00;
         }
         //}
@@ -1712,7 +1789,7 @@ bool TVTExtendedGetVersion::setMsgToAttr(CANMsg *pMsg, TVT_Net *pVT_Net, Loopbac
             //
             pVT_Net->VT_VersionSize = 2 * 32;
             //pVT_Net->VT_InfoMode=1;
-            listDir(SD, str.constData(), 1, pVT_Net);
+            listDir(str.toLatin1().constData(), 1, pVT_Net);
             //
             if (pVT_Net->VT_InfoMode > 0) {
                 qWarning() << pVT_Net->VT_VersionList;
@@ -1785,7 +1862,7 @@ bool TVTExtendedStoreVersion::setMsgToAttr(CANMsg *pMsg, TVT_Net *pVT_Net, Loopb
             VTError = 0x01;
             if (storeFile(pVT_Net)) {
                 str = "/" + VTVersionFolder;
-                listDir(str.constData(), 1, pVT_Net);
+                listDir(str.toLatin1().constData(), 1, pVT_Net);
                 VTError = 0x00;
             }
         }
@@ -1834,10 +1911,9 @@ bool TVTExtendedLoadVersion::setMsgToAttr(CANMsg *pMsg, TVT_Net *pVT_Net, Loopba
         if (VTError == 0x00) {
             VTError = 0x01;
             str = "/" + VTVersionFolder;
-            str = str + "/" + VTVersionLabel + ".iop";
-            if (readFile(SD, str.constData(), pStream, pVT_Net)) {
-                str = "/" + VTVersionFolder;
-                listDir(SD, str.constData(), 1, pVT_Net);
+            QString fullPath = str + "/" + VTVersionLabel + ".iop";
+            if (readFile(fullPath.toLatin1().constData(), pStream, pVT_Net)) {
+                listDir(str.toLatin1().constData(), 1, pVT_Net);
                 VTError = 0x00;
             }
         }
@@ -1886,10 +1962,9 @@ bool TVTExtendedDeleteVersion::setMsgToAttr(CANMsg *pMsg, TVT_Net *pVT_Net, Loop
         if (VTError == 0x00) {
             VTError = 0x01;
             str = "/" + VTVersionFolder;
-            str = str + "/" + VTVersionLabel + ".iop";
-            if (deleteFile(SD, str.constData(), pStream, pVT_Net)) {
-                str = "/" + VTVersionFolder;
-                listDir(SD, str.constData(), 1, pVT_Net);
+            QString fullPath = str + "/" + VTVersionLabel + ".iop";
+            if (deleteFile(fullPath.toLatin1().constData(), pStream, pVT_Net)) {
+                listDir(str.toLatin1().constData(), 1, pVT_Net);
                 VTError = 0x00;
             }
         }
@@ -2100,12 +2175,10 @@ bool TVTScreenCapture::setMsgToAttr(CANMsg *pMsg, TVT_Net *pVT_Net)
                 Set_setScreenShot(pVT_Net, true);
                 //
                 if (pMsg->DATA[3] == 0) {
-                    valid = readImage(SD, str, pVT_Net);
+                    valid = readImage(str.toLatin1().constData(), pVT_Net);
                 } else {
-                    valid = writeImage(SD, str.constData(), pVT_Net);
-                    //pVT_Net->VT_InfoMode=1;
-                    listDir(SD, "/", 0, pVT_Net);
-                    //pVT_Net->VT_InfoMode=0;
+                    valid = writeImage(str.toLatin1().constData(), pVT_Net);
+                    listDir("/", 0, pVT_Net);
                 }
                 Set_setScreenShot(pVT_Net, false);
             }

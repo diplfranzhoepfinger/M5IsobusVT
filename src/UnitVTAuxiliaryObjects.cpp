@@ -115,7 +115,7 @@ void TVTAuxiliaryFuncInp::getAID()
             break;
         case 3:
             if (VTObjType == 29)
-                VTObjects = ww;
+                VTObjects = QString::number(ww);
             if (VTObjType == 30)
                 VTInputID = ww;
             if (VTObjType == 31) {
@@ -123,13 +123,13 @@ void TVTAuxiliaryFuncInp::getAID()
                 //VTLockAssign     =((VTFuncTyp>>6) & 0x01)>0); //Bit 6
                 //VTSingleAssign   =((VTFuncTyp>>7) & 0x01)>0);//Bit 7
                 //List VTObjects
-                VTObjects = ww;
+                VTObjects = QString::number(ww);
             }
             break;
         //list
         case 4:
             if (VTObjType == 30)
-                VTObjects = ww;
+                VTObjects = QString::number(ww);
             break;
         } //switch i
     } //for i
@@ -277,7 +277,7 @@ bool TVTAuxObject::PaintObjTo(TVT_ViewRect *pViewRect, TVT_Net *pVT_Net)
             && ((VTPointerTyp == 1) || (VTPointerTyp == 3))) {
             //if (VTPointerTyp==1){
             refIdx = getVTObjID(pVT_Net, VTValue, false, true);
-            //qWarning() << "refID=" + QString(refIdx);
+            //qWarning() << "refID=" + QString::number(refIdx);
             //
             if (refIdx >= 0) {
                 //
@@ -286,8 +286,8 @@ bool TVTAuxObject::PaintObjTo(TVT_ViewRect *pViewRect, TVT_Net *pVT_Net)
                     str = pVT_Net->VTAuxAssignList;
                     //
                     if (TEST) {
-                        qWarning() << "refID=" + QString(refIdx);
-                        qWarning() << "refAux=" + QString(pVT_Net->VTObjType);
+                        qWarning() << "refID=" + QString::number(refIdx);
+                        qWarning() << "refAux=" + QString::number(pVT_Net->VTObjType);
                         getStreamStrInfo(pVT_Net);
                         qWarning() << str;
                         qWarning() << auxValue;
@@ -305,11 +305,11 @@ bool TVTAuxObject::PaintObjTo(TVT_ViewRect *pViewRect, TVT_Net *pVT_Net)
                         if (TEST) {
                             qWarning() << "WS_auxFunc=" + WS_auxFunc;
                             qWarning() << "auxFunc=" + auxFunc;
-                            qWarning() << "WS_auxFunc_listNr=" + QString(WS_auxFunc_listNr);
+                            qWarning() << "WS_auxFunc_listNr=" + QString::number(WS_auxFunc_listNr);
                             //
                             qWarning() << "WS_auxInp=" + WS_auxInp;
                             qWarning() << "auxInp=" + auxInp;
-                            qWarning() << "WS_auxInp_listNr=" + QString(WS_auxInp_listNr);
+                            qWarning() << "WS_auxInp_listNr=" + QString::number(WS_auxInp_listNr);
                         }
                         //
                         //FOUND AUX_ASSIGN
@@ -317,8 +317,8 @@ bool TVTAuxObject::PaintObjTo(TVT_ViewRect *pViewRect, TVT_Net *pVT_Net)
                         if ((pVT_Net->VTObjType == gAuxFuncType) && (auxFunc == auxValue)) {
                             qWarning() << "FOUND auxFunc=" + auxFunc;
                             objID = hexCharacterToObjID(auxInp);
-                            qWarning() << "WS_auxInp_listNr=" + QString(WS_auxInp_listNr);
-                            qWarning() << "auxInp_objID=" + QString(objID);
+                            qWarning() << "WS_auxInp_listNr=" + QString::number(WS_auxInp_listNr);
+                            qWarning() << "auxInp_objID=" + QString::number(objID);
                             //
                             if ((WS_auxInp_listNr < 2) && (oList != WS_auxInp_listNr)) {
                                 pVT_Net->listNr = (pVT_Net->listNr + 1) % 2;
@@ -329,11 +329,11 @@ bool TVTAuxObject::PaintObjTo(TVT_ViewRect *pViewRect, TVT_Net *pVT_Net)
                                 if (getVTObjID(pVT_Net, 0, true, true) >= 0) {
                                     pVT_Net->optn = 33;
                                     objID = pVT_Net->VTObjID;
-                                    qWarning() << "auxInp_WS_objID=" + QString(objID);
+                                    qWarning() << "auxInp_WS_objID=" + QString::number(objID);
                                 }
                             }
                             //
-                            qWarning() << "pVT_Net->listNr=" + QString(pVT_Net->listNr);
+                            qWarning() << "pVT_Net->listNr=" + QString::number(pVT_Net->listNr);
                             assign = SetObjPaintObjToRef(&vvRect, pVT_Net, objID);
                             break; //while
                         } //gAuxFuncType
@@ -342,8 +342,8 @@ bool TVTAuxObject::PaintObjTo(TVT_ViewRect *pViewRect, TVT_Net *pVT_Net)
                         if ((pVT_Net->VTObjType == gAuxInpType) && (auxInp == auxValue)) {
                             qWarning() << "FOUND auxInp=" + auxInp;
                             objID = hexCharacterToObjID(auxFunc);
-                            qWarning() << "WS_auxFunc_listNr=" + QString(WS_auxFunc_listNr);
-                            qWarning() << "auxFunc_objID=" + QString(objID);
+                            qWarning() << "WS_auxFunc_listNr=" + QString::number(WS_auxFunc_listNr);
+                            qWarning() << "auxFunc_objID=" + QString::number(objID);
                             //
                             if ((WS_auxFunc_listNr < 2) && (oList != WS_auxFunc_listNr)) {
                                 pVT_Net->listNr = (pVT_Net->listNr + 1) % 2;
@@ -354,11 +354,11 @@ bool TVTAuxObject::PaintObjTo(TVT_ViewRect *pViewRect, TVT_Net *pVT_Net)
                                 if (getVTObjID(pVT_Net, 0, true, true) >= 0) {
                                     pVT_Net->optn = 33;
                                     objID = pVT_Net->VTObjID;
-                                    qWarning() << "auxFunc_WS_objID=" + QString(objID);
+                                    qWarning() << "auxFunc_WS_objID=" + QString::number(objID);
                                 }
                             }
                             //
-                            qWarning() << "pVT_Net->listNr=" + QString(pVT_Net->listNr);
+                            qWarning() << "pVT_Net->listNr=" + QString::number(pVT_Net->listNr);
                             assign = SetObjPaintObjToRef(&vvRect, pVT_Net, objID);
                             break; //while
                         } //gAuxInpType

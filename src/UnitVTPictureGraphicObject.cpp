@@ -26,7 +26,7 @@ int16_t objIdx=pVT_Net->objNr;
   if (pViewRect==NULL) {
       if (pVT_Net->nameAttr=="VTMacros"){
        getAID(); pVT_Net->newValueAttr=QString::number(VTEvent);
-       pVT_Net->nameAttr= VTMacros;
+        pVT_Net->nameAttr= QString::number(VTMacros);
        return valid;   
       }
       if (pVT_Net->nameAttr!="") err=SetVTObjectAttributeDirect(pVT_Net->nameAttr, pVT_Net->newValueAttr,pVT_Net);
@@ -165,8 +165,8 @@ void TVTPictureGraphic::setAID(){
  VTAttrAID[5].numAID=2;  VTAttrAID[5].byteAID=1; VTAttrAID[5].typeAID=1; VTAttrAID[5].nameAID="VTOptions";        VTAttrAID[5].valueAID=QString::number(VTOptions);
  VTAttrAID[6].numAID=3;  VTAttrAID[6].byteAID=1; VTAttrAID[6].typeAID=1; VTAttrAID[6].nameAID="VTTransparencyColour"; VTAttrAID[6].valueAID=QString::number(VTTransparencyColour);
  //
- VTAttrAID[7].numAID=7;  VTAttrAID[7].byteAID=4; VTAttrAID[7].typeAID=2; VTAttrAID[7].nameAID="VTPicData";        VTAttrAID[7].valueAID=VTPicData;
- VTAttrAID[8].numAID=8;  VTAttrAID[8].byteAID=1; VTAttrAID[8].typeAID=2; VTAttrAID[8].nameAID="VTMacros";         VTAttrAID[8].valueAID=VTMacros;
+ VTAttrAID[7].numAID=7;  VTAttrAID[7].byteAID=4; VTAttrAID[7].typeAID=2; VTAttrAID[7].nameAID="VTPicData";        VTAttrAID[7].valueAID=QString::number(VTPicData);
+ VTAttrAID[8].numAID=8;  VTAttrAID[8].byteAID=1; VTAttrAID[8].typeAID=2; VTAttrAID[8].nameAID="VTMacros";         VTAttrAID[8].valueAID=QString::number(VTMacros);
  VT_AID_Nr=9;
 };
 

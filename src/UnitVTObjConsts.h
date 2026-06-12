@@ -29,6 +29,11 @@
 #include <QString>
 #include <QDateTime>
 
+#if !defined(ESP32) && !defined(ARDUINO)
+typedef QString String;
+#endif
+
+
 //==============================================================================
 //==============================================================================
 //Definition consts
@@ -626,6 +631,145 @@ class TVT_TECU_Data {
 };
 
 
+#if !defined(ESP32) && !defined(ARDUINO)
+struct setup_t {
+    int version = 0;
+    int trans = 0;
+    int serial = 0;
+    int tft_driver = 0;
+    int tft_width = 0;
+    int tft_height = 0;
+    int r0_x_offset = 0;
+    int r0_y_offset = 0;
+    int r1_x_offset = 0;
+    int r1_y_offset = 0;
+    int r2_x_offset = 0;
+    int r2_y_offset = 0;
+    int r3_x_offset = 0;
+    int r3_y_offset = 0;
+    int pin_tft_mosi = -1;
+    int pin_tft_miso = -1;
+    int pin_tft_clk = -1;
+    int pin_tft_cs = -1;
+    int pin_tft_dc = -1;
+    int pin_tft_rst = -1;
+    int pin_tft_wr = -1;
+    int pin_tft_rd = -1;
+    int pin_tft_d0 = -1;
+    int pin_tft_d1 = -1;
+    int pin_tft_d2 = -1;
+    int pin_tft_d3 = -1;
+    int pin_tft_d4 = -1;
+    int pin_tft_d5 = -1;
+    int pin_tft_d6 = -1;
+    int pin_tft_d7 = -1;
+    double tft_spi_freq = 0;
+};
+
+struct GFXfont {};
+
+struct DummySprite {
+    bool fontLoaded = false;
+    uint16_t fontsLoaded() { return 0; }
+    uint16_t alphaColor = 0;
+    uint8_t alpha = 0;
+    bool setTransp = false;
+    bool setScreenShot = false;
+    void setColorDepth(int) {}
+    void createSprite(int, int) {}
+    int width() { return 320; }
+    int height() { return 240; }
+    void pushImage(int, int, int, int, uint16_t*) {}
+    void pushSprite(int, int) {}
+    void setTextDatum(int) {}
+    void setTextSize(int) {}
+    void setTextColor(uint16_t) {}
+    void setTextColor(uint16_t, uint16_t) {}
+    void setTextFont(uint8_t) {}
+    void setFreeFont(const GFXfont*) {}
+    void fillScreen(uint16_t) {}
+    void drawString(const QString &, int, int, int = 0) {}
+    void drawCentreString(const QString &, int, int, int) {}
+    void drawChar(char, int, int, int) {}
+    void drawNumber(int, int, int, int) {}
+    void unloadFont() {}
+    void loadFont(const char*) {}
+    void loadFont(const QString &) {}
+    void loadFont(const QString &, bool) {}
+    void loadFont(const uint8_t*) {}
+    void setCursor(int, int) {}
+    void drawGlyph(uint16_t) {}
+    void frameViewport(uint16_t, bool) {}
+    void setViewport(int, int, int, int, bool) {}
+    void resetViewport() {}
+    void drawRect(int, int, int, int, uint16_t) {}
+    void drawRoundRect(int, int, int, int, int, uint16_t) {}
+    void fillRect(int, int, int, int, uint16_t) {}
+    void drawLine(int, int, int, int, uint16_t) {}
+    void fillTriangle(int, int, int, int, int, int, uint16_t) {}
+    void drawTriangle(int, int, int, int, int, int, uint16_t) {}
+    void pushImageAlpha(int, int, int, int, uint16_t*, uint8_t*, uint16_t) {}
+    void drawPixel(int, int, uint16_t, uint8_t = 255) {}
+    uint16_t readPixel(int, int) { return 0; }
+    void setSwapBytes(bool) {}
+    bool getSwapBytes() { return false; }
+};
+
+struct DummyTFT : public DummySprite {
+    uint16_t gWidth[1024] = {0};
+    int16_t gdX[1024] = {0};
+    bool getUnicodeIndex(uint16_t unicode, uint16_t *index) {
+        *index = 0;
+        return false;
+    }
+    void getSetup(setup_t &user) {}
+    template<typename... Args>
+    void printf(const char* format, Args... args) {
+        ::printf(format, args...);
+    }
+    uint16_t color565(uint8_t r, uint8_t g, uint8_t b) {
+        return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
+    }
+    void init() {}
+    void invertDisplay(bool) {}
+    void setRotation(int) {}
+    void setAttribute(int, int) {}
+    int getAttribute(int) { return 0; }
+};
+
+#define PSRAM_ENABLE 0
+#define sq(x) ((x) * (x))
+
+struct DummySerial {
+    template<typename... Args>
+    void printf(const char* format, Args... args) {
+        ::printf(format, args...);
+    }
+    template<typename... Args>
+    void print(Args... args) {
+        // stub
+    }
+    template<typename... Args>
+    void println(Args... args) {
+        // stub
+    }
+};
+extern DummySerial Serial;
+
+#define TFT_BLACK 0
+#define MC_DATUM 4
+#define TFT_WHITE 0xFFFF
+#define TFT_RED 0xF800
+#define TFT_GREEN 0x07E0
+#define TFT_BLUE 0x001F
+#define TFT_DARKGREEN 0x03E0
+#define TFT_DARKGREY 0x7BEF
+#define TFT_YELLOW 0xFFE0
+#define TFT_LIGHTGREY 0xC618
+typedef uint8_t byte;
+#endif
+
+
 //------------------------------------------------------------------------------
 //Definition Messages ID and PGN's
 //------------------------------------------------------------------------------
@@ -915,7 +1059,11 @@ class TVT_Net {
     Point rPoint;
    #endif
    //
-  uint16_t VTKeyboardOffs=0x0000;
+#if !defined(ESP32) && !defined(ARDUINO)
+   DummyTFT tft;
+   DummySprite ImgTFT;
+#endif
+   uint16_t VTKeyboardOffs=0x0000;
   //
   uint8_t  VTTraceFilter=0xFF; //not trace filtering
   uint8_t  VTTraceActive=0;

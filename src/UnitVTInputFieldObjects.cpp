@@ -161,12 +161,12 @@ void TVTInputBooleanField::getAID()
             break;
         //List
         case 7:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent += 1;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEvent = 0;
 };
 
@@ -389,12 +389,12 @@ void TVTInputStringField::getAID()
             break;
         //List
         case 11:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent += 1;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEvent = 0;
 };
 
@@ -653,12 +653,12 @@ void TVTInputNumberField::getAID()
             break;
         //list
         case 16:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent += 1;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEnabled = 0;
 };
 
@@ -895,7 +895,7 @@ void TVTInputListField::getAID()
             VTEvent += 1;
             break;
         case 5:
-            VTItems = ww;
+            VTItems = QString::number(ww);
             VTEvent += 1;
             VTEvent += 2 * ww;
             break;
@@ -906,12 +906,12 @@ void TVTInputListField::getAID()
             break;
         //list
         case 7:
-            VTMacros = ww;
+            VTMacros = QString::number(ww);
             VTEvent += 1;
             break;
         } //switch i
     } //for i
-    if (VTMacros == 0)
+    if (VTMacros.toInt() == 0)
         VTEnabled = 0;
 };
 
